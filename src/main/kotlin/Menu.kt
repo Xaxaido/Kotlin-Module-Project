@@ -63,16 +63,16 @@ class Menu {
         var input: String
 
         do {
-            println("Поле не может быть пустым")
             input = sc.nextLine()
+            if (input.isEmpty()) println("Поле не может быть пустым")
         } while (input.isEmpty())
 
         return input
     }
 
     private fun showMenu(list: List<Data>) {
-        list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
         back =  list.size + 1
+        list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
         println("$back. Выход")
         getUserInput()
     }
@@ -102,7 +102,7 @@ class Menu {
         }
 
         return if (id > list!!.size) {
-            list.first().onError()
+            println("Элемента с таким номером не существует")
             null
         } else id
     }
@@ -169,16 +169,16 @@ class Menu {
 
     }
 
-    companion object {
-        const val CURRENT = 1
-        const val EXIT = -1
-        const val CREATE = 0
-        const val ARCHIVE = -2
-        const val CREATE_ARCHIVE = -3
-        const val OPEN_ARCHIVE = -4
-        const val NOTE = -5
-        const val CREATE_NOTE = -6
-        const val OPEN_NOTE = -7
+    private companion object {
+        private const val CURRENT = 1
+        private const val EXIT = -1
+        private const val CREATE = 0
+        private const val ARCHIVE = -2
+        private const val CREATE_ARCHIVE = -3
+        private const val OPEN_ARCHIVE = -4
+        private const val NOTE = -5
+        private const val CREATE_NOTE = -6
+        private const val OPEN_NOTE = -7
     }
 
 }
