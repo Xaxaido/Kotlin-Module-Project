@@ -16,7 +16,7 @@ class Menu {
         println("Введите название архива")
         archives.add(Archive(getEntryInput(), mutableListOf()))
         navigation.archiveId = archives.size - 1
-        navigation.screens.add(NOTE)
+        navigation.add(NOTE)
         noteScreen(archives[archives.size - 1].data)
     }
 
@@ -40,7 +40,7 @@ class Menu {
             content.append("$str\n")
         }
 
-        archives[navigation.archiveId].data = archives[navigation.archiveId].copy().data + Note(name, content.toString())
+        archives[navigation.archiveId].add(Note(name, content.toString()))
         noteScreen(archives[navigation.archiveId].data)
     }
 
@@ -53,7 +53,7 @@ class Menu {
             val str = scanner.nextLine()
         } while (str != "0")
 
-        navigation.screens.removeLast()
+        navigation.removeLast()
         noteScreen(archives[navigation.archiveId].data)
     }
 
@@ -150,12 +150,12 @@ class Menu {
                 CREATE -> true
                 back -> {
                     id = getCurrentScreen(true).let { if (it == ARCHIVE) EXIT else it }
-                    navigation.screens.removeLast()
+                    navigation.removeLast()
                     true
                 }
                 else -> {
                     if (isOutOfRange(id) != null) {
-                        navigation.screens.add(openEntries(id))
+                        navigation.add(openEntries(id))
                         true
                     } else false
                 }
