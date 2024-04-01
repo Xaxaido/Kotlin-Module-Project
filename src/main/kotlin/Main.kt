@@ -1,5 +1,3 @@
-
-fun main() {
-    val menu = Menu()
-    menu.start()
+fun main(args: Array<String>) {
+    println("Hello World!")
 }
