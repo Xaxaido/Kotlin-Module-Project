@@ -1,7 +1,7 @@
 import java.util.Scanner
 class Menu {
 
-    private val sc = Scanner(System.`in`)
+    private val scanner = Scanner(System.`in`)
     private val archives: MutableList<Archive> = mutableListOf()
     private val navigation = MenuNavigation(ARCHIVE)
     private var back = EXIT
@@ -20,7 +20,7 @@ class Menu {
         noteScreen(archives[archives.size - 1].data)
     }
 
-    private val noteScreen: (MutableList<Note>) -> Unit = {
+    private val noteScreen: (List<Note>) -> Unit = {
         println(makeHeader("Список заметок архива ${archives[navigation.archiveId].name}"))
         println("0. Создать заметку")
         showMenu(it)
@@ -40,7 +40,7 @@ class Menu {
             content.append("$str\n")
         }
 
-        archives[navigation.archiveId].data.add(Note(name, content.toString()))
+        archives[navigation.archiveId].data = archives[navigation.archiveId].copy().data + Note(name, content.toString())
         noteScreen(archives[navigation.archiveId].data)
     }
 
@@ -50,7 +50,7 @@ class Menu {
 
         do {
             println("0. Выход")
-            val str = sc.nextLine()
+            val str = scanner.nextLine()
         } while (str != "0")
 
         navigation.screens.removeLast()
@@ -59,15 +59,13 @@ class Menu {
 
     fun start() { archiveScreen(archives) }
 
-    private fun makeHeader(header: String): String {
-        return "${"*".repeat(ASTERISK_COUNT)}$header${"*".repeat(ASTERISK_COUNT)}"
-    }
+    private fun makeHeader(header: String) = "${"*".repeat(ASTERISK_COUNT)}$header${"*".repeat(ASTERISK_COUNT)}"
 
     private fun getEntryInput(): String {
         var input: String
 
         do {
-            input = sc.nextLine()
+            input = scanner.nextLine()
             if (input.isEmpty()) println("Поле не может быть пустым")
         } while (input.isEmpty())
 
@@ -79,19 +77,6 @@ class Menu {
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
         println("$back. Выход")
         getUserInput()
-    }
-
-    private fun draw(id: Int) {
-
-        when (id) {
-            ARCHIVE -> archiveScreen(archives)
-            CREATE_ARCHIVE -> createArchive()
-            OPEN_ARCHIVE -> noteScreen(archives[navigation.archiveId].data)
-            NOTE -> noteScreen(archives[navigation.archiveId].data)
-            CREATE_NOTE -> createNote()
-            OPEN_NOTE -> openNote(archives[navigation.archiveId].data[navigation.noteId])
-        }
-
     }
 
     private fun getCurrentScreen(isBackPressed: Boolean): Int {
@@ -111,7 +96,7 @@ class Menu {
         } else id
     }
 
-    private fun openScreen(id: Int): Int {
+    private fun openEntries(id: Int): Int {
         val screen = getCurrentScreen(false)
 
         return when {
@@ -121,15 +106,24 @@ class Menu {
         }
     }
 
+    private fun draw(id: Int) {
+
+        when (id) {
+            ARCHIVE -> archiveScreen(archives)
+            CREATE_ARCHIVE -> createArchive()
+            OPEN_ARCHIVE -> noteScreen(archives[navigation.archiveId].data)
+            NOTE -> noteScreen(archives[navigation.archiveId].data)
+            CREATE_NOTE -> createNote()
+            OPEN_NOTE -> openNote(archives[navigation.archiveId].data[navigation.noteId])
+        }
+    }
+
     private fun getScreen(id: Int): Int {
-        val screens = navigation.screens
         val currentScreen = getCurrentScreen(false)
 
         return when {
-            currentScreen == back -> screens[screens.size - 2]
-            id == CREATE -> {
-                if (currentScreen == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
-            }
+            currentScreen == back -> navigation.screens[navigation.screens.size - 2]
+            id == CREATE -> if (currentScreen == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
             currentScreen == NOTE && id > CREATE -> {
                 navigation.archiveId = id - 1
                 OPEN_ARCHIVE
@@ -148,7 +142,7 @@ class Menu {
 
         do {
 
-            val input = sc.nextLine()
+            val input = scanner.nextLine()
             id = input.toIntOrNull()
 
             isCorrect = when (id) {
@@ -161,7 +155,7 @@ class Menu {
                 }
                 else -> {
                     if (isOutOfRange(id) != null) {
-                        navigation.screens.add(openScreen(id))
+                        navigation.screens.add(openEntries(id))
                         true
                     } else false
                 }

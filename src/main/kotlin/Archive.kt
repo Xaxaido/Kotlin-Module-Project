@@ -1,5 +1,5 @@
 data class Archive(
 
     override val name: String,
-    val data: MutableList<Note>
+    var data: List<Note>
 ) : Data
