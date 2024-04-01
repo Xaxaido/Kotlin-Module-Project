@@ -7,21 +7,21 @@ class Menu {
     private var back = EXIT
 
     private val archiveScreen: (MutableList<Archive>) -> Unit = {
-        println("Список архивов:")
+        println(makeHeader("Список архивов"))
         println("0. Создать архив")
         showMenu(it)
     }
 
     private val createArchive: () -> Unit = {
         println("Введите название архива")
-        archives.add(Archive(getEntryInput(), mutableListOf<Note>()))
+        archives.add(Archive(getEntryInput(), mutableListOf()))
         navigation.archiveId = archives.size - 1
         navigation.screens.add(NOTE)
         noteScreen(archives[archives.size - 1].data)
     }
 
     private val noteScreen: (MutableList<Note>) -> Unit = {
-        println("Список заметок:")
+        println(makeHeader("Список заметок архива ${archives[navigation.archiveId].name}"))
         println("0. Создать заметку")
         showMenu(it)
     }
@@ -45,7 +45,7 @@ class Menu {
     }
 
     private val openNote: (Note) -> Unit = {
-        println("Заметка ${it.name}")
+        println(makeHeader(it.name))
         println(it.content)
 
         do {
@@ -58,6 +58,10 @@ class Menu {
     }
 
     fun start() { archiveScreen(archives) }
+
+    private fun makeHeader(header: String): String {
+        return "${"*".repeat(ASTERISK_COUNT)}$header${"*".repeat(ASTERISK_COUNT)}"
+    }
 
     private fun getEntryInput(): String {
         var input: String
@@ -90,12 +94,12 @@ class Menu {
 
     }
 
-    private fun getScreenById(id: Int, isBackPressed: Boolean): Int {
-        return if (navigation.screens.size == 1 && isBackPressed) EXIT else navigation.screens[navigation.screens.size - id]
+    private fun getCurrentScreen(isBackPressed: Boolean): Int {
+        return if (navigation.screens.size == 1 && isBackPressed) EXIT else navigation.screens[navigation.screens.size - 1]
     }
 
     private fun isOutOfRange(id: Int): Int? {
-        val list = when (getScreenById(CURRENT, false)) {
+        val list = when (getCurrentScreen(false)) {
             ARCHIVE -> archives
             NOTE -> archives[navigation.archiveId].data
             else -> null
@@ -107,8 +111,8 @@ class Menu {
         } else id
     }
 
-    private fun getItemScreen(id: Int): Int {
-        val screen = getScreenById(CURRENT, false)
+    private fun openScreen(id: Int): Int {
+        val screen = getCurrentScreen(false)
 
         return when {
             id > CREATE && screen == ARCHIVE -> NOTE
@@ -119,7 +123,7 @@ class Menu {
 
     private fun getScreen(id: Int): Int {
         val screens = navigation.screens
-        val currentScreen = getScreenById(CURRENT, false)
+        val currentScreen = getCurrentScreen(false)
 
         return when {
             currentScreen == back -> screens[screens.size - 2]
@@ -140,7 +144,7 @@ class Menu {
 
     private fun getUserInput() {
         var id: Int?
-        var isCorrect = true
+        var isCorrect: Boolean
 
         do {
 
@@ -151,13 +155,13 @@ class Menu {
                 null -> { println("Введите число"); false }
                 CREATE -> true
                 back -> {
-                    id = getScreenById(CURRENT, true).let { if (it == ARCHIVE) EXIT else it }
+                    id = getCurrentScreen(true).let { if (it == ARCHIVE) EXIT else it }
                     navigation.screens.removeLast()
                     true
                 }
                 else -> {
                     if (isOutOfRange(id) != null) {
-                        navigation.screens.add(getItemScreen(id))
+                        navigation.screens.add(openScreen(id))
                         true
                     } else false
                 }
@@ -170,7 +174,6 @@ class Menu {
     }
 
     private companion object {
-        private const val CURRENT = 1
         private const val EXIT = -1
         private const val CREATE = 0
         private const val ARCHIVE = -2
@@ -179,6 +182,7 @@ class Menu {
         private const val NOTE = -5
         private const val CREATE_NOTE = -6
         private const val OPEN_NOTE = -7
+        private const val ASTERISK_COUNT = 5
     }
 
 }
