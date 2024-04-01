@@ -1,28 +1,35 @@
 import java.util.Scanner
+
 class Menu {
 
     private val scanner = Scanner(System.`in`)
     private val archives: MutableList<Archive> = mutableListOf()
-    private val navigation = MenuNavigation(ARCHIVE)
+    private val nav = MenuNavigation(ARCHIVE)
     private var back = EXIT
 
     private val archiveScreen: (MutableList<Archive>) -> Unit = {
         println(makeHeader("Список архивов"))
         println("0. Создать архив")
+        nav.list = archives
         showMenu(it)
     }
 
     private val createArchive: () -> Unit = {
         println("Введите название архива")
         archives.add(Archive(getEntryInput(), mutableListOf()))
-        navigation.archiveId = archives.size - 1
-        navigation.add(NOTE)
+
+        with (nav) {
+            archiveId = archives.size - 1
+            add(NOTE)
+        }
+
         noteScreen(archives[archives.size - 1].data)
     }
 
     private val noteScreen: (List<Note>) -> Unit = {
-        println(makeHeader("Список заметок архива ${archives[navigation.archiveId].name}"))
+        println(makeHeader("Список заметок архива ${archives[nav.archiveId].name}"))
         println("0. Создать заметку")
+        nav.list = archives[nav.archiveId].data
         showMenu(it)
     }
 
@@ -40,8 +47,8 @@ class Menu {
             content.append("$str\n")
         }
 
-        archives[navigation.archiveId].add(Note(name, content.toString()))
-        noteScreen(archives[navigation.archiveId].data)
+        archives[nav.archiveId].add(Note(name, content.toString()))
+        noteScreen(archives[nav.archiveId].data)
     }
 
     private val openNote: (Note) -> Unit = {
@@ -53,8 +60,8 @@ class Menu {
             val str = scanner.nextLine()
         } while (str != "0")
 
-        navigation.removeLast()
-        noteScreen(archives[navigation.archiveId].data)
+        nav.removeLast()
+        noteScreen(archives[nav.archiveId].data)
     }
 
     fun start() { archiveScreen(archives) }
@@ -79,25 +86,8 @@ class Menu {
         getUserInput()
     }
 
-    private fun getCurrentScreen(isBackPressed: Boolean): Int {
-        return if (navigation.screens.size == 1 && isBackPressed) EXIT else navigation.screens[navigation.screens.size - 1]
-    }
-
-    private fun isOutOfRange(id: Int): Int? {
-        val list = when (getCurrentScreen(false)) {
-            ARCHIVE -> archives
-            NOTE -> archives[navigation.archiveId].data
-            else -> null
-        }
-
-        return if (id > list!!.size) {
-            println("Элемента с таким номером не существует")
-            null
-        } else id
-    }
-
     private fun openEntries(id: Int): Int {
-        val screen = getCurrentScreen(false)
+        val screen = nav.getCurrentScreen(false)
 
         return when {
             id > CREATE && screen == ARCHIVE -> NOTE
@@ -111,25 +101,25 @@ class Menu {
         when (id) {
             ARCHIVE -> archiveScreen(archives)
             CREATE_ARCHIVE -> createArchive()
-            OPEN_ARCHIVE -> noteScreen(archives[navigation.archiveId].data)
-            NOTE -> noteScreen(archives[navigation.archiveId].data)
+            OPEN_ARCHIVE -> noteScreen(archives[nav.archiveId].data)
+            NOTE -> noteScreen(archives[nav.archiveId].data)
             CREATE_NOTE -> createNote()
-            OPEN_NOTE -> openNote(archives[navigation.archiveId].data[navigation.noteId])
+            OPEN_NOTE -> openNote(archives[nav.archiveId].data[nav.noteId])
         }
     }
 
     private fun getScreen(id: Int): Int {
-        val currentScreen = getCurrentScreen(false)
+        val currentScreen = nav.getCurrentScreen(false)
 
         return when {
-            currentScreen == back -> navigation.screens[navigation.screens.size - 2]
+            currentScreen == back -> nav.screens[nav.screens.size - 2]
             id == CREATE -> if (currentScreen == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
             currentScreen == NOTE && id > CREATE -> {
-                navigation.archiveId = id - 1
+                nav.archiveId = id - 1
                 OPEN_ARCHIVE
             }
             currentScreen == OPEN_NOTE && id > CREATE -> {
-                navigation.noteId =  id - 1
+                nav.noteId =  id - 1
                 OPEN_NOTE
             }
             else -> currentScreen
@@ -149,13 +139,13 @@ class Menu {
                 null -> { println("Введите число"); false }
                 CREATE -> true
                 back -> {
-                    id = getCurrentScreen(true).let { if (it == ARCHIVE) EXIT else it }
-                    navigation.removeLast()
+                    id = nav.getCurrentScreen(true).let { if (it == ARCHIVE) EXIT else it }
+                    nav.removeLast()
                     true
                 }
                 else -> {
-                    if (isOutOfRange(id) != null) {
-                        navigation.add(openEntries(id))
+                    if (nav.isOutOfRange(id) != null) {
+                        nav.add(openEntries(id))
                         true
                     } else false
                 }
@@ -167,8 +157,8 @@ class Menu {
 
     }
 
-    private companion object {
-        private const val EXIT = -1
+     companion object {
+        const val EXIT = -1
         private const val CREATE = 0
         private const val ARCHIVE = -2
         private const val CREATE_ARCHIVE = -3
