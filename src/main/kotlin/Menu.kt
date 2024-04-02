@@ -9,13 +9,15 @@ class Menu {
         var stringCreate = ""
 
         with (Nav) {
-            when (getCurrentMenu()) {
+            when (screens.last { screen -> screen < EXIT }) {
                 ARCHIVE -> {
-                    stringList = Archive.stringList; stringCreate = Archive.stringCreate
+                    stringList = Archive.STR_LIST
+                    stringCreate = Archive.STR_CREATE
                 }
 
                 NOTE -> {
-                    stringList = "${Note.stringList} ${archives[archiveId].name}"; stringCreate = Note.stringCreate
+                    stringList = "${Note.STR_LIST} ${archives[archiveId].name}"
+                    stringCreate = Note.STR_CREATE
                 }
             }
         }
@@ -26,9 +28,9 @@ class Menu {
     }
 
     private val createArchive: () -> Unit = {
-        println("Введите название архива")
-        with (Nav) {
+        println(Archive.STR_ENTER_NAME)
 
+        with (Nav) {
             addArchive(Archive(getEntryInput(), listOf()))
             archiveId = archives.size - 1
             add(NOTE)
@@ -37,7 +39,7 @@ class Menu {
     }
 
     private val createNote: () -> Unit = {
-        println("Введите название заметки")
+        println(Note.STR_ENTER_NAME)
 
         val name = getEntryInput()
         val content = StringBuilder()

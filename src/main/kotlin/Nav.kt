@@ -16,28 +16,16 @@ object Nav : Mutable<Int, Archive> {
     var archives: List<Archive> = listOf()
     private var list = listOf<Data>()
 
-    fun getCurrentMenu(): Int {
-        for (i in screens.size - 1 downTo 0) {
-            if (screens[i] < EXIT) return screens[i]
-        }
-        return screens.last()
-    }
-
     fun isOutOfRange(id: Int): Int? {
 
-        for (i in screens.size - 1 downTo 0) {
-            list = when (screens[i]) {
-                ARCHIVE -> archives
-                NOTE -> archives[archiveId].data
-                else -> emptyList()
-            }
-            if (list.isNotEmpty()) break
+        screens.last { it < EXIT }.let {
+            list = if (it == ARCHIVE) archives else archives[archiveId].data
         }
 
         return if (id > list.size + 1) { println(Data.OUT_OF_RANGE); null } else id
     }
 
-    fun getCurrentScreen(isBack: Boolean) = if (screens.size == 1 && isBack) EXIT else screens[screens.size - 1]
+    fun getCurrentScreen(isBack: Boolean) = if (screens.size == 1 && isBack) EXIT else screens.last()
     override fun add(newValue: Int) { screens = screens.toList() + newValue }
     override fun addArchive(newValue: Archive) { archives = archives.toList() + newValue }
     override fun removeLast() { screens = screens.subList(0, screens.size - 1) }

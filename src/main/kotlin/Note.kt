@@ -5,8 +5,9 @@ data class Note(
 ) : Data {
 
     companion object {
-        const val stringList = "Список заметок архива"
-        const val stringCreate = "0. Создать заметку"
+        const val STR_LIST = "Список заметок архива"
+        const val STR_CREATE = "0. Создать заметку"
+        const val STR_ENTER_NAME = "Введите название заметки"
     }
 
 }

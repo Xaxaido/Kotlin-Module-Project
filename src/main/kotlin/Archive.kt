@@ -9,7 +9,8 @@ data class Archive(
     override fun removeLast() {}
 
     companion object {
-        const val stringList = "Cписок архивов"
-        const val stringCreate = "0. Создать архив"
+        const val STR_LIST = "Cписок архивов"
+        const val STR_CREATE = "0. Создать архив"
+        const val STR_ENTER_NAME = "Введите название архива"
     }
 }
