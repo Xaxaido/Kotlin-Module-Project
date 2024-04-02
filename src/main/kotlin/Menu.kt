@@ -4,26 +4,36 @@ class Menu {
 
     private val scanner = Scanner(System.`in`)
 
-    private val archiveScreen: (MutableList<Archive>) -> Unit = {
-        println(makeHeader("Список архивов"))
-        println("0. Создать архив")
+    private val menuScreen: (List<Data>) -> Unit = {
+        var stringList = ""
+        var stringCreate = ""
+
+        with (Nav) {
+            when (getCurrentMenu()) {
+                ARCHIVE -> {
+                    stringList = Archive.stringList; stringCreate = Archive.stringCreate
+                }
+
+                NOTE -> {
+                    stringList = "${Note.stringList} ${archives[archiveId].name}"; stringCreate = Note.stringCreate
+                }
+            }
+        }
+
+        println(makeHeader(stringList))
+        println(stringCreate)
         showMenu(it)
     }
 
     private val createArchive: () -> Unit = {
         println("Введите название архива")
         with (Nav) {
-            archives.add(Archive(getEntryInput(), mutableListOf()))
+
+            addArchive(Archive(getEntryInput(), listOf()))
             archiveId = archives.size - 1
             add(NOTE)
+            menuScreen(archives[archiveId].data)
         }
-        noteScreen(Nav.archives[Nav.archiveId].data)
-    }
-
-    private val noteScreen: (List<Data>) -> Unit = {
-        println(makeHeader("Список заметок архива ${Nav.archives[Nav.archiveId].name}"))
-        println("0. Создать заметку")
-        showMenu(it)
     }
 
     private val createNote: () -> Unit = {
@@ -41,7 +51,7 @@ class Menu {
         }
 
         Nav.archives[Nav.archives.size - 1].add(Note(name, content.toString()))
-        noteScreen(Nav.archives[Nav.archiveId].data)
+        menuScreen(Nav.archives[Nav.archiveId].data)
     }
 
     private val openNote: (Note) -> Unit = {
@@ -54,10 +64,10 @@ class Menu {
         } while (str != "0")
 
         Nav.removeLast()
-        noteScreen(Nav.archives[Nav.archiveId].data)
+        menuScreen(Nav.archives[Nav.archiveId].data)
     }
 
-    fun start() { archiveScreen(Nav.archives) }
+    fun start() { menuScreen(Nav.archives) }
 
     private fun makeHeader(header: String) = "${"*".repeat(Nav.ASTERISK_COUNT)}$header${"*".repeat(Nav.ASTERISK_COUNT)}"
 
@@ -73,7 +83,7 @@ class Menu {
     }
 
     private fun showMenu(list: List<Data>) {
-        Nav.back =  list.size + 1
+        Nav.back = list.size + 1
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
         println("${Nav.back}. Выход")
         getUserInput()
@@ -92,10 +102,10 @@ class Menu {
     private fun draw(id: Int) {
 
         when (id) {
-            Nav.ARCHIVE -> archiveScreen(Nav.archives)
+            Nav.ARCHIVE -> menuScreen(Nav.archives)
             Nav.CREATE_ARCHIVE -> createArchive()
-            Nav.OPEN_ARCHIVE -> noteScreen(Nav.archives[Nav.archives.size - 1].data)
-            Nav.NOTE -> noteScreen(Nav.archives[Nav.archives.size - 1].data)
+            Nav.OPEN_ARCHIVE -> menuScreen(Nav.archives[Nav.archives.size - 1].data)
+            Nav.NOTE -> menuScreen(Nav.archives[Nav.archives.size - 1].data)
             Nav.CREATE_NOTE -> createNote()
             Nav.OPEN_NOTE -> openNote(Nav.archives[Nav.archiveId].data[Nav.noteId])
         }
@@ -108,7 +118,7 @@ class Menu {
             currentScreen == Nav.back -> Nav.screens[Nav.screens.size - 2]
             id == Nav.CREATE -> if (currentScreen == Nav.ARCHIVE) Nav.CREATE_ARCHIVE else Nav.CREATE_NOTE
             currentScreen == Nav.NOTE && id > Nav.CREATE -> { Nav.archiveId = id - 1; Nav.OPEN_ARCHIVE }
-            currentScreen == Nav.OPEN_NOTE && id > Nav.CREATE -> {  Nav.noteId =  id - 1; Nav.OPEN_NOTE }
+            currentScreen == Nav.OPEN_NOTE && id > Nav.CREATE -> { Nav.noteId =  id - 1; Nav.OPEN_NOTE }
             else -> currentScreen
         }
     }
