@@ -21,7 +21,7 @@ class Menu {
             }
         }
 
-        println(makeHeader(stringList))
+        println(Decor.makeHeader(stringList, Nav.ASTERISK_COUNT))
         println(stringCreate)
         showMenu(it)
     }
@@ -56,8 +56,7 @@ class Menu {
     }
 
     private val openNote: (Note) -> Unit = {
-        println(makeHeader(it.name))
-        println(it.content)
+        Decor.makeFrame(it)
 
         do { println("0. Выход") } while (scanner.nextLine() != "0")
 
@@ -66,8 +65,6 @@ class Menu {
     }
 
     fun start() { menuScreen(Nav.archives) }
-
-    private fun makeHeader(header: String) = "${"*".repeat(Nav.ASTERISK_COUNT)}$header${"*".repeat(Nav.ASTERISK_COUNT)}"
 
     private fun getEntryInput(): String {
         var input: String

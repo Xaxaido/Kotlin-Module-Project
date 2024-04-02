@@ -1,7 +1,7 @@
 object Nav : Mutable<Int, Archive> {
 
-    const val EXIT = -1
     const val CREATE = 0
+    const val EXIT = -1
     const val ARCHIVE = -2
     const val CREATE_ARCHIVE = -3
     const val OPEN_ARCHIVE = -4
@@ -13,7 +13,7 @@ object Nav : Mutable<Int, Archive> {
     var back = EXIT
     var noteId = -1
     var screens = listOf(ARCHIVE)
-    var archives: List<Archive> = listOf()
+    var archives = listOf<Archive>()
     private var list = listOf<Data>()
 
     fun isOutOfRange(id: Int): Int? {
