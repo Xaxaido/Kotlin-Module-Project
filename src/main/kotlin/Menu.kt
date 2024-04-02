@@ -3,38 +3,42 @@ import java.util.Scanner
 class Menu {
 
     private val scanner = Scanner(System.`in`)
-    private val archives: MutableList<Archive> = mutableListOf()
-    private val nav = MenuNavigation(ARCHIVE)
-    private var back = EXIT
 
-    private val archiveScreen: (MutableList<Archive>) -> Unit = {
-        println(makeHeader("Список архивов"))
-        println("0. Создать архив")
-        nav.list = archives
+    private val menuScreen: (List<Data>) -> Unit = {
+        var stringList = ""
+        var stringCreate = ""
+
+        with (Nav) {
+            when (screens.last { screen -> screen < EXIT }) {
+                ARCHIVE -> {
+                    stringList = Archive.STR_LIST
+                    stringCreate = Archive.STR_CREATE
+                }
+                NOTE -> {
+                    stringList = "${Note.STR_LIST} ${archives[archiveId].name}"
+                    stringCreate = Note.STR_CREATE
+                }
+            }
+        }
+
+        println(makeHeader(stringList))
+        println(stringCreate)
         showMenu(it)
     }
 
     private val createArchive: () -> Unit = {
-        println("Введите название архива")
-        archives.add(Archive(getEntryInput(), mutableListOf()))
+        println(Archive.STR_ENTER_NAME)
 
-        with (nav) {
+        with (Nav) {
+            addArchive(Archive(getEntryInput(), listOf()))
             archiveId = archives.size - 1
             add(NOTE)
+            menuScreen(archives[archiveId].data)
         }
-
-        noteScreen(archives[archives.size - 1].data)
-    }
-
-    private val noteScreen: (List<Note>) -> Unit = {
-        println(makeHeader("Список заметок архива ${archives[nav.archiveId].name}"))
-        println("0. Создать заметку")
-        nav.list = archives[nav.archiveId].data
-        showMenu(it)
     }
 
     private val createNote: () -> Unit = {
-        println("Введите название заметки")
+        println(Note.STR_ENTER_NAME)
 
         val name = getEntryInput()
         val content = StringBuilder()
@@ -42,31 +46,28 @@ class Menu {
         println("Введите текст заметки\n0. Сохранить и выйти")
         while (true) {
 
-            val str = getEntryInput()
-            if (str == "0") break
-            content.append("$str\n")
+            val text = getEntryInput()
+            if (text == "0") break
+            content.append("$text\n")
         }
 
-        archives[nav.archiveId].add(Note(name, content.toString()))
-        noteScreen(archives[nav.archiveId].data)
+        Nav.archives[Nav.archives.size - 1].add(Note(name, content.toString()))
+        menuScreen(Nav.archives[Nav.archiveId].data)
     }
 
     private val openNote: (Note) -> Unit = {
         println(makeHeader(it.name))
         println(it.content)
 
-        do {
-            println("0. Выход")
-            val str = scanner.nextLine()
-        } while (str != "0")
+        do { println("0. Выход") } while (scanner.nextLine() != "0")
 
-        nav.removeLast()
-        noteScreen(archives[nav.archiveId].data)
+        Nav.removeLast()
+        menuScreen(Nav.archives[Nav.archiveId].data)
     }
 
-    fun start() { archiveScreen(archives) }
+    fun start() { menuScreen(Nav.archives) }
 
-    private fun makeHeader(header: String) = "${"*".repeat(ASTERISK_COUNT)}$header${"*".repeat(ASTERISK_COUNT)}"
+    private fun makeHeader(header: String) = "${"*".repeat(Nav.ASTERISK_COUNT)}$header${"*".repeat(Nav.ASTERISK_COUNT)}"
 
     private fun getEntryInput(): String {
         var input: String
@@ -80,49 +81,46 @@ class Menu {
     }
 
     private fun showMenu(list: List<Data>) {
-        back =  list.size + 1
+        Nav.back = list.size + 1
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
-        println("$back. Выход")
+        println("${Nav.back}. Выход")
         getUserInput()
     }
 
     private fun openEntries(id: Int): Int {
-        val screen = nav.getCurrentScreen(false)
+        val screen = Nav.getCurrentScreen(false)
 
         return when {
-            id > CREATE && screen == ARCHIVE -> NOTE
-            id > CREATE && screen == NOTE -> OPEN_NOTE
+            id > Nav.CREATE && screen == Nav.ARCHIVE -> Nav.NOTE
+            id > Nav.CREATE && screen == Nav.NOTE -> Nav.OPEN_NOTE
             else -> screen
         }
     }
 
     private fun draw(id: Int) {
-
-        when (id) {
-            ARCHIVE -> archiveScreen(archives)
-            CREATE_ARCHIVE -> createArchive()
-            OPEN_ARCHIVE -> noteScreen(archives[nav.archiveId].data)
-            NOTE -> noteScreen(archives[nav.archiveId].data)
-            CREATE_NOTE -> createNote()
-            OPEN_NOTE -> openNote(archives[nav.archiveId].data[nav.noteId])
+        with (Nav) {
+            when (id) {
+                ARCHIVE -> menuScreen(archives)
+                CREATE_ARCHIVE -> createArchive()
+                OPEN_ARCHIVE -> menuScreen(archives[archives.size - 1].data)
+                NOTE -> menuScreen(archives[archives.size - 1].data)
+                CREATE_NOTE -> createNote()
+                OPEN_NOTE -> openNote(archives[archiveId].data[noteId])
+            }
         }
     }
 
     private fun getScreen(id: Int): Int {
-        val currentScreen = nav.getCurrentScreen(false)
+        with (Nav) {
+            val screen = getCurrentScreen(false)
 
-        return when {
-            currentScreen == back -> nav.screens[nav.screens.size - 2]
-            id == CREATE -> if (currentScreen == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
-            currentScreen == NOTE && id > CREATE -> {
-                nav.archiveId = id - 1
-                OPEN_ARCHIVE
+            return when {
+                screen == back -> screens[screens.size - 2]
+                id == CREATE -> if (screen == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
+                screen == NOTE && id > CREATE -> { archiveId = id - 1; OPEN_ARCHIVE }
+                screen == OPEN_NOTE && id > CREATE -> { noteId = id - 1; OPEN_NOTE }
+                else -> screen
             }
-            currentScreen == OPEN_NOTE && id > CREATE -> {
-                nav.noteId =  id - 1
-                OPEN_NOTE
-            }
-            else -> currentScreen
         }
     }
 
@@ -130,43 +128,30 @@ class Menu {
         var id: Int?
         var isCorrect: Boolean
 
-        do {
+        with (Nav) {
+            do {
 
-            val input = scanner.nextLine()
-            id = input.toIntOrNull()
+                id = scanner.nextLine().toIntOrNull()
 
-            isCorrect = when (id) {
-                null -> { println("Введите число"); false }
-                CREATE -> true
-                back -> {
-                    id = nav.getCurrentScreen(true).let { if (it == ARCHIVE) EXIT else it }
-                    nav.removeLast()
-                    true
-                }
-                else -> {
-                    if (nav.isOutOfRange(id) != null) {
-                        nav.add(openEntries(id))
+                isCorrect = when (id) {
+                    null -> { println("Введите число"); false }
+                    CREATE -> true
+                    back -> {
+                        id = getCurrentScreen(true).let { if (it == ARCHIVE) EXIT else it }
+                        removeLast()
                         true
-                    } else false
+                    }
+                    else -> {
+                        if (isOutOfRange(id!!) != null) {
+                            add(openEntries(id!!))
+                            true
+                        } else false
+                    }
                 }
-            }
 
-        } while(!isCorrect)
+            } while (!isCorrect)
 
         if (id == EXIT) return else draw(getScreen(id!!))
-
+        }
     }
-
-     companion object {
-        const val EXIT = -1
-        private const val CREATE = 0
-        private const val ARCHIVE = -2
-        private const val CREATE_ARCHIVE = -3
-        private const val OPEN_ARCHIVE = -4
-        private const val NOTE = -5
-        private const val CREATE_NOTE = -6
-        private const val OPEN_NOTE = -7
-        private const val ASTERISK_COUNT = 5
-    }
-
 }
