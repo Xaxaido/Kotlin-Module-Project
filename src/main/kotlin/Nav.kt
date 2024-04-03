@@ -26,7 +26,7 @@ object Nav : Mutable<Int, Archive> {
     }
 
     fun getCurrentScreen(isBack: Boolean) = if (screens.size == 1 && isBack) EXIT else screens.last()
-    override fun add(newValue: Int) { screens = screens.toList() + newValue }
+    override fun addValue(newValue: Int) { screens = screens.toList() + newValue }
     override fun addArchive(newValue: Archive) { archives = archives.toList() + newValue }
     override fun removeLast() { screens = screens.subList(0, screens.size - 1) }
 }

@@ -32,7 +32,7 @@ class Menu {
         with (Nav) {
             addArchive(Archive(getEntryInput(), listOf()))
             archiveId = archives.size - 1
-            add(NOTE)
+            addValue(NOTE)
             menuScreen(archives[archiveId].data)
         }
     }
@@ -51,7 +51,7 @@ class Menu {
             content.append("$text\n")
         }
 
-        Nav.archives[Nav.archives.size - 1].add(Note(name, content.toString()))
+        Nav.archives[Nav.archives.size - 1].addValue(Note(name, content.toString()))
         menuScreen(Nav.archives[Nav.archiveId].data)
     }
 
@@ -71,16 +71,14 @@ class Menu {
 
         do {
             input = scanner.nextLine()
-            if (input.isEmpty()) println("Поле не может быть пустым")
-        } while (input.isEmpty())
+        } while (input.isEmpty().apply { if (this) println("Поле не может быть пустым") })
 
         return input
     }
 
     private fun showMenu(list: List<Data>) {
-        Nav.back = list.size + 1
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
-        println("${Nav.back}. Выход")
+        Nav.back = (list.size + 1).apply { println("$this. Выход") }
         getUserInput()
     }
 
@@ -140,7 +138,7 @@ class Menu {
                     }
                     else -> {
                         if (isOutOfRange(id!!) != null) {
-                            add(openEntries(id!!))
+                            addValue(openEntries(id!!))
                             true
                         } else false
                     }

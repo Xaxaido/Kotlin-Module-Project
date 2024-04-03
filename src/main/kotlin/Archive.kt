@@ -4,7 +4,7 @@ data class Archive(
     var data: List<Note>
 ) : Data, Mutable<Note, Nothing> {
 
-    override fun add(newValue: Note) { data = copy().data + newValue }
+    override fun addValue(newValue: Note) { data = copy().data + newValue }
     override fun addArchive(newValue: Nothing) {}
     override fun removeLast() {}
 
