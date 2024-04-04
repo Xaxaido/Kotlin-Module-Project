@@ -6,7 +6,7 @@ class Decor {
         private const val DIVIDER = '-'
         private const val DECOR_SIDE = '|'
 
-        fun makeHeader(header: String, width: Int) = "${"*".repeat(width)} $header ${"*".repeat(width)}"
+        fun makeHeader(header: String, width: Int) = "*".repeat(width).let { "$it $header $it" }
 
         fun makeFrame(note: Note) {
 
@@ -16,10 +16,8 @@ class Decor {
 
             println(makeHeader(note.name, width / 2 + PADDING))
             list.forEachIndexed { i, e ->
-                val sidePadding = width + PADDING - e.length
-
                 if (i == 0) divider()
-                println("$DECOR_SIDE ${" ".repeat(PADDING)}$e${" ".repeat(sidePadding)}$DECOR_SIDE")
+                println("$DECOR_SIDE ${" ".repeat(PADDING)}$e${" ".repeat(width + PADDING - e.length)}$DECOR_SIDE")
                 if (i == list.size - 1) divider()
             }
         }

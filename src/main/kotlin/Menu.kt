@@ -15,25 +15,23 @@ class Menu {
                     stringCreate = Archive.STR_CREATE
                 }
                 NOTE -> {
-                    stringList = "${Note.STR_LIST} ${archives[archiveId].name}"
+                    stringList = "${Note.STR_LIST} ${archive.name}"
                     stringCreate = Note.STR_CREATE
                 }
             }
         }
 
-        println(Decor.makeHeader(stringList, Nav.ASTERISK_COUNT))
-        println(stringCreate)
+        println("${Decor.makeHeader(stringList, Nav.ASTERISK_COUNT)}\n$stringCreate")
         showMenu(it)
     }
 
     private val createArchive: () -> Unit = {
         println(Archive.STR_ENTER_NAME)
-
         with (Nav) {
-            addArchive(Archive(getEntryInput(), listOf()))
-            archiveId = archives.size - 1
+            addEntry(Archive(getEntryInput(), listOf()))
+            archiveId = archives.lastIndex
             addValue(NOTE)
-            menuScreen(archives[archiveId].data)
+            menuScreen(archive.data)
         }
     }
 
@@ -44,15 +42,12 @@ class Menu {
         val content = StringBuilder()
 
         println("Введите текст заметки\n0. Сохранить и выйти")
-        while (true) {
+        do {
+            val isExit = getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
+        } while (!isExit)
 
-            val text = getEntryInput()
-            if (text == "0") break
-            content.append("$text\n")
-        }
-
-        Nav.archives[Nav.archives.size - 1].addValue(Note(name, content.toString()))
-        menuScreen(Nav.archives[Nav.archiveId].data)
+        Nav.archive.addValue(Note(name, content.toString()))
+        menuScreen(Nav.archive.data)
     }
 
     private val openNote: (Note) -> Unit = {
@@ -61,7 +56,7 @@ class Menu {
         do { println("0. Выход") } while (scanner.nextLine() != "0")
 
         Nav.removeLast()
-        menuScreen(Nav.archives[Nav.archiveId].data)
+        menuScreen(Nav.archive.data)
     }
 
     fun start() { menuScreen(Nav.archives) }
@@ -97,10 +92,10 @@ class Menu {
             when (id) {
                 ARCHIVE -> menuScreen(archives)
                 CREATE_ARCHIVE -> createArchive()
-                OPEN_ARCHIVE -> menuScreen(archives[archives.size - 1].data)
-                NOTE -> menuScreen(archives[archives.size - 1].data)
+                OPEN_ARCHIVE -> menuScreen(lastArchive.data)
+                NOTE -> menuScreen(lastArchive.data)
                 CREATE_NOTE -> createNote()
-                OPEN_NOTE -> openNote(archives[archiveId].data[noteId])
+                OPEN_NOTE -> openNote(archive.data[noteId])
             }
         }
     }

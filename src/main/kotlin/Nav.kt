@@ -14,6 +14,10 @@ object Nav : Mutable<Int, Archive> {
     var noteId = -1
     var screens = listOf(ARCHIVE)
     var archives = listOf<Archive>()
+    val archive: Archive
+        get() = archives[archiveId]
+    val lastArchive: Archive
+        get() = archives[archives.lastIndex]
     private var list = listOf<Data>()
 
     fun isOutOfRange(id: Int): Int? {
@@ -27,6 +31,6 @@ object Nav : Mutable<Int, Archive> {
 
     fun getCurrentScreen(isBack: Boolean) = if (screens.size == 1 && isBack) EXIT else screens.last()
     override fun addValue(newValue: Int) { screens = screens.toList() + newValue }
-    override fun addArchive(newValue: Archive) { archives = archives.toList() + newValue }
-    override fun removeLast() { screens = screens.subList(0, screens.size - 1) }
+    override fun addEntry(newEntry: Archive) { archives = archives.toList() + newEntry }
+    override fun removeLast() { screens = screens.subList(0, screens.lastIndex) }
 }

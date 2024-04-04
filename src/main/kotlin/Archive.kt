@@ -5,8 +5,6 @@ data class Archive(
 ) : Data, Mutable<Note, Nothing> {
 
     override fun addValue(newValue: Note) { data = copy().data + newValue }
-    override fun addArchive(newValue: Nothing) {}
-    override fun removeLast() {}
 
     companion object {
         const val STR_LIST = "Cписок архивов"
