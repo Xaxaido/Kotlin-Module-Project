@@ -2,9 +2,7 @@ data class Archive(
 
     override val name: String,
     var data: List<Note>
-) : Data, Mutable<Note, Nothing> {
-
-    override fun addValue(newValue: Note) { data = copy().data + newValue }
+) : Data, Mutable{
 
     companion object {
         const val STR_LIST = "Cписок архивов"

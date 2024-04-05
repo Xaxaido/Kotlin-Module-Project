@@ -21,16 +21,16 @@ class Menu {
             }
         }
 
-        println("${Decor.makeHeader(stringList, Nav.ASTERISK_COUNT)}\n$stringCreate")
+        println("${Decor.makeHeader(stringList)}\n$stringCreate")
         showMenu(it)
     }
 
     private val createArchive: () -> Unit = {
         println(Archive.STR_ENTER_NAME)
         with (Nav) {
-            addEntry(Archive(getEntryInput(), listOf()))
+            archives = addValue(archives, Archive(getEntryInput(), listOf()))
             archiveId = archives.lastIndex
-            addValue(NOTE)
+            screens = addValue(screens, NOTE)
             menuScreen(archive.data)
         }
     }
@@ -46,7 +46,7 @@ class Menu {
             val isExit = getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
         } while (!isExit)
 
-        Nav.archive.addValue(Note(name, content.toString()))
+        Nav.archive.data = Nav.addValue(Nav.archive.data, Note(name, content.toString()))
         menuScreen(Nav.archive.data)
     }
 
@@ -133,7 +133,7 @@ class Menu {
                     }
                     else -> {
                         if (isOutOfRange(id!!) != null) {
-                            addValue(openEntries(id!!))
+                            screens = addValue(screens, openEntries(id!!))
                             true
                         } else false
                     }

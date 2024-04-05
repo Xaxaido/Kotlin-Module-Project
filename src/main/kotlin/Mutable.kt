@@ -1,6 +1,5 @@
-interface Mutable<T, E> {
+interface Mutable {
 
-    fun addValue(newValue: T)
-    fun addEntry(newEntry: E) {}
+    fun <T> addValue(list: List<T>, newValue: T) = list.toList() + newValue
     fun removeLast() {}
 }
