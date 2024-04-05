@@ -5,29 +5,21 @@ class Menu {
     private val scanner = Scanner(System.`in`)
 
     private val menuScreen: (List<Data>) -> Unit = {
-        var stringList = ""
-        var stringCreate = ""
-
-        with (Nav) {
-            when (screens.last { screen -> screen < EXIT }) {
-                ARCHIVE -> {
-                    stringList = Archive.STR_LIST
-                    stringCreate = Archive.STR_CREATE
-                }
-                NOTE -> {
-                    stringList = "${Note.STR_LIST} ${archive.name}"
-                    stringCreate = Note.STR_CREATE
-                }
+        with(Nav) {
+            val data = when (screens.last { screen -> screen < EXIT }) {
+                ARCHIVE -> arrayOf(Archive.STR_LIST, Archive.STR_CREATE)
+                NOTE -> arrayOf("${Note.STR_LIST} ${archive.name}", Note.STR_CREATE)
+                else -> arrayOf()
             }
-        }
 
-        println("${Decor.makeHeader(stringList)}\n$stringCreate")
-        showMenu(it)
+            println("${Decor.makeHeader(data[0])}\n${data[1]}")
+            showMenu(it)
+        }
     }
 
     private val createArchive: () -> Unit = {
         println(Archive.STR_ENTER_NAME)
-        with (Nav) {
+        with(Nav) {
             archives = addValue(archives, Archive(getEntryInput(), listOf()))
             archiveId = archives.lastIndex
             screens = addValue(screens, NOTE)
@@ -43,7 +35,8 @@ class Menu {
 
         println("Введите текст заметки\n0. Сохранить и выйти")
         do {
-            val isExit = getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
+            val isExit =
+                getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
         } while (!isExit)
 
         Nav.archive.data = Nav.addValue(Nav.archive.data, Note(name, content.toString()))
@@ -52,14 +45,16 @@ class Menu {
 
     private val openNote: (Note) -> Unit = {
         Decor.makeFrame(it)
-
-        do { println("0. Выход") } while (scanner.nextLine() != "0")
-
+        do {
+            println("0. Выход")
+        } while (scanner.nextLine() != "0")
         Nav.removeLast()
         menuScreen(Nav.archive.data)
     }
 
-    fun start() { menuScreen(Nav.archives) }
+    fun start() {
+        menuScreen(Nav.archives)
+    }
 
     private fun getEntryInput(): String {
         var input: String
@@ -77,39 +72,40 @@ class Menu {
         getUserInput()
     }
 
-    private fun openEntries(id: Int): Int {
-        val screen = Nav.getCurrentScreen(false)
-
-        return when {
-            id > Nav.CREATE && screen == Nav.ARCHIVE -> Nav.NOTE
-            id > Nav.CREATE && screen == Nav.NOTE -> Nav.OPEN_NOTE
-            else -> screen
-        }
-    }
-
     private fun draw(id: Int) {
-        with (Nav) {
+        with(Nav) {
             when (id) {
                 ARCHIVE -> menuScreen(archives)
                 CREATE_ARCHIVE -> createArchive()
-                OPEN_ARCHIVE -> menuScreen(lastArchive.data)
-                NOTE -> menuScreen(lastArchive.data)
+                OPEN_ARCHIVE, NOTE -> menuScreen(lastArchive.data)
                 CREATE_NOTE -> createNote()
                 OPEN_NOTE -> openNote(archive.data[noteId])
             }
         }
     }
 
+    private fun openEntries(id: Int): Int {
+        with (Nav) {
+            return getCurrentScreen(false).let {
+                when {
+                    id > CREATE && it == ARCHIVE -> NOTE
+                    id > CREATE && it == NOTE -> OPEN_NOTE
+                    else -> it
+                }
+            }
+        }
+    }
+
     private fun getScreen(id: Int): Int {
         with (Nav) {
-            val screen = getCurrentScreen(false)
-
-            return when {
-                screen == back -> screens[screens.size - 2]
-                id == CREATE -> if (screen == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
-                screen == NOTE && id > CREATE -> { archiveId = id - 1; OPEN_ARCHIVE }
-                screen == OPEN_NOTE && id > CREATE -> { noteId = id - 1; OPEN_NOTE }
-                else -> screen
+            return getCurrentScreen(false).let {
+                when {
+                    it == back -> screens[screens.size - 2]
+                    id == CREATE -> if (it == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
+                    id > CREATE && it == NOTE -> { archiveId = id - 1; OPEN_ARCHIVE }
+                    id > CREATE && it == OPEN_NOTE -> { noteId = id - 1; OPEN_NOTE }
+                    else -> it
+                }
             }
         }
     }
@@ -118,9 +114,8 @@ class Menu {
         var id: Int?
         var isCorrect: Boolean
 
-        with (Nav) {
+        with(Nav) {
             do {
-
                 id = scanner.nextLine().toIntOrNull()
 
                 isCorrect = when (id) {
@@ -132,16 +127,12 @@ class Menu {
                         true
                     }
                     else -> {
-                        if (isOutOfRange(id!!) != null) {
-                            screens = addValue(screens, openEntries(id!!))
-                            true
-                        } else false
+                        isOutOfRange(id!!)?.let { screens = addValue(screens, openEntries(id!!)); true } ?: false
                     }
                 }
-
             } while (!isCorrect)
 
-        if (id == EXIT) return else draw(getScreen(id!!))
+            if (id == EXIT) return else draw(getScreen(id!!))
         }
     }
 }

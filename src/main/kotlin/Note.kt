@@ -9,5 +9,4 @@ data class Note(
         const val STR_CREATE = "0. Создать заметку"
         const val STR_ENTER_NAME = "Введите название заметки"
     }
-
 }

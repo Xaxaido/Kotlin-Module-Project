@@ -2,7 +2,7 @@ data class Archive(
 
     override val name: String,
     var data: List<Note>
-) : Data, Mutable{
+) : Data, Mutable {
 
     companion object {
         const val STR_LIST = "Cписок архивов"
