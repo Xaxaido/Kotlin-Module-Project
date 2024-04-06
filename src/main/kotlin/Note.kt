@@ -1,13 +1,14 @@
 data class Note(
 
-    override val name: String,
-    val content: String
+    override val name: String = "",
+    val content: String = ""
 ) : Data {
 
     companion object {
-        const val STR_LIST = "Список заметок архива"
-        const val STR_CREATE = "0. Создать заметку"
-        const val STR_ENTER_NAME = "Введите название заметки"
+        val text = mapOf (
+            "List" to "Список заметок архива",
+            "Create" to "0. Создать заметку",
+            "Enter" to "Введите название заметки"
+        )
     }
-
 }

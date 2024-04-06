@@ -1,16 +1,14 @@
 data class Archive(
 
-    override val name: String,
-    var data: List<Note>
-) : Data, Mutable<Note, Nothing> {
-
-    override fun add(newValue: Note) { data = copy().data + newValue }
-    override fun addArchive(newValue: Nothing) {}
-    override fun removeLast() {}
-
+    override val name: String = "",
+    var data: List<Note> = listOf()
+) : Data, Mutable {
+    
     companion object {
-        const val STR_LIST = "Cписок архивов"
-        const val STR_CREATE = "0. Создать архив"
-        const val STR_ENTER_NAME = "Введите название архива"
+        val text = mapOf(
+            "List" to "Cписок архивов",
+            "Create" to "0. Создать архив",
+            "Enter" to "Введите название архива"
+        )
     }
 }

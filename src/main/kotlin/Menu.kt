@@ -4,154 +4,127 @@ class Menu {
 
     private val scanner = Scanner(System.`in`)
 
-    private val menuScreen: (List<Data>) -> Unit = {
-        var stringList = ""
-        var stringCreate = ""
-
+    private val createArchive: (String) -> Unit = {
         with (Nav) {
-            when (screens.last { screen -> screen < EXIT }) {
-                ARCHIVE -> {
-                    stringList = Archive.STR_LIST
-                    stringCreate = Archive.STR_CREATE
-                }
-                NOTE -> {
-                    stringList = "${Note.STR_LIST} ${archives[archiveId].name}"
-                    stringCreate = Note.STR_CREATE
-                }
-            }
-        }
-
-        println(makeHeader(stringList))
-        println(stringCreate)
-        showMenu(it)
-    }
-
-    private val createArchive: () -> Unit = {
-        println(Archive.STR_ENTER_NAME)
-
-        with (Nav) {
-            addArchive(Archive(getEntryInput(), listOf()))
-            archiveId = archives.size - 1
-            add(NOTE)
-            menuScreen(archives[archiveId].data)
+            archives = addValue(archives, Archive(it, listOf()))
+            archiveId = archives.lastIndex
+            screens = addValue(screens, NOTE)
         }
     }
 
-    private val createNote: () -> Unit = {
-        println(Note.STR_ENTER_NAME)
-
-        val name = getEntryInput()
+    private val createNote: (String) -> Unit = {
         val content = StringBuilder()
 
         println("Введите текст заметки\n0. Сохранить и выйти")
-        while (true) {
+        do {
+            val isExit = getEntryInput().let {
+                input -> if (input == "0") true else content.append("$input\n").isEmpty()
+            }
+        } while (!isExit)
 
-            val text = getEntryInput()
-            if (text == "0") break
-            content.append("$text\n")
-        }
-
-        Nav.archives[Nav.archives.size - 1].add(Note(name, content.toString()))
-        menuScreen(Nav.archives[Nav.archiveId].data)
+        Nav.archive.data = Nav.addValue(Nav.archive.data, Note(it, content.toString()))
     }
 
     private val openNote: (Note) -> Unit = {
-        println(makeHeader(it.name))
-        println(it.content)
-
-        do { println("0. Выход") } while (scanner.nextLine() != "0")
-
-        Nav.removeLast()
-        menuScreen(Nav.archives[Nav.archiveId].data)
+        Decor.makeFrame(it)
+        do {
+            println("0. Выход")
+        } while (scanner.nextLine() != "0")
+        Nav.screens = Nav.removeLast(Nav.screens)
+        showMenu(Nav.archive.data)
     }
 
-    fun start() { menuScreen(Nav.archives) }
+    fun start() { showMenu(Nav.archives) }
 
-    private fun makeHeader(header: String) = "${"*".repeat(Nav.ASTERISK_COUNT)}$header${"*".repeat(Nav.ASTERISK_COUNT)}"
+    private fun addEntry(onAdd: (String) -> Unit) {
+        println(getText()["Enter"]!!)
+        onAdd(getEntryInput())
+        showMenu(Nav.archive.data)
+    }
 
     private fun getEntryInput(): String {
         var input: String
-
         do {
             input = scanner.nextLine()
-            if (input.isEmpty()) println("Поле не может быть пустым")
-        } while (input.isEmpty())
-
+        } while (input.isEmpty().apply { if (this) println("Поле не может быть пустым") })
         return input
     }
 
     private fun showMenu(list: List<Data>) {
-        Nav.back = list.size + 1
+        println("${Decor.makeHeader(getText()["List"]!!)}\n${getText()["Create"]!!}")
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
-        println("${Nav.back}. Выход")
+        Nav.back = (list.size + 1).apply { println("$this. Выход") }
         getUserInput()
     }
 
-    private fun openEntries(id: Int): Int {
-        val screen = Nav.getCurrentScreen(false)
-
-        return when {
-            id > Nav.CREATE && screen == Nav.ARCHIVE -> Nav.NOTE
-            id > Nav.CREATE && screen == Nav.NOTE -> Nav.OPEN_NOTE
-            else -> screen
+    private fun getText(): Map<String, String> {
+        return when (Nav.screens.last { it < Nav.EXIT }) {
+            Nav.ARCHIVE -> Archive.text
+            Nav.NOTE -> Note.text
+            else -> emptyMap()
         }
     }
 
     private fun draw(id: Int) {
-        with (Nav) {
+        with(Nav) {
             when (id) {
-                ARCHIVE -> menuScreen(archives)
-                CREATE_ARCHIVE -> createArchive()
-                OPEN_ARCHIVE -> menuScreen(archives[archives.size - 1].data)
-                NOTE -> menuScreen(archives[archives.size - 1].data)
-                CREATE_NOTE -> createNote()
-                OPEN_NOTE -> openNote(archives[archiveId].data[noteId])
+                ARCHIVE -> showMenu(archives)
+                CREATE_ARCHIVE -> addEntry(createArchive)
+                OPEN_ARCHIVE, NOTE -> showMenu(lastArchive.data)
+                CREATE_NOTE -> addEntry(createNote)
+                OPEN_NOTE -> openNote(archive.data[noteId])
             }
         }
     }
 
     private fun getScreen(id: Int): Int {
         with (Nav) {
-            val screen = getCurrentScreen(false)
+            return getCurrentScreen(false).let {
+                when {
+                    it == back -> screens[screens.size - 2]
+                    id == CREATE -> if (it == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
+                    id > CREATE && it == NOTE -> { noteId = id - 1; OPEN_ARCHIVE }
+                    id > CREATE && it == OPEN_NOTE -> { noteId = id - 1; OPEN_NOTE }
+                    else -> it
+                }
+            }
+        }
+    }
 
-            return when {
-                screen == back -> screens[screens.size - 2]
-                id == CREATE -> if (screen == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
-                screen == NOTE && id > CREATE -> { archiveId = id - 1; OPEN_ARCHIVE }
-                screen == OPEN_NOTE && id > CREATE -> { noteId = id - 1; OPEN_NOTE }
-                else -> screen
+    private fun getMenuEntry(id: Int): Boolean {
+        with (Nav) {
+            return isOutOfRange(id).apply {
+                if (this) getCurrentScreen(false).let { screen ->
+                    screens = addValue(screens, when {
+                        id > CREATE && screen == ARCHIVE -> NOTE
+                        id > CREATE && screen == NOTE -> OPEN_NOTE
+                        else -> screen
+                    })
+                }
             }
         }
     }
 
     private fun getUserInput() {
         var id: Int?
-        var isCorrect: Boolean
 
-        with (Nav) {
+        with(Nav) {
             do {
-
                 id = scanner.nextLine().toIntOrNull()
 
-                isCorrect = when (id) {
+                val isCorrect = when (id) {
                     null -> { println("Введите число"); false }
                     CREATE -> true
                     back -> {
                         id = getCurrentScreen(true).let { if (it == ARCHIVE) EXIT else it }
-                        removeLast()
+                        screens = removeLast(screens)
                         true
                     }
-                    else -> {
-                        if (isOutOfRange(id!!) != null) {
-                            add(openEntries(id!!))
-                            true
-                        } else false
-                    }
+                    else -> getMenuEntry(id!!)
                 }
-
             } while (!isCorrect)
 
-        if (id == EXIT) return else draw(getScreen(id!!))
+            if (id == EXIT) return else draw(getScreen(id!!))
         }
     }
 }
