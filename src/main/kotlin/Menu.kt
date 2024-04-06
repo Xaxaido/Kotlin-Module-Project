@@ -17,8 +17,8 @@ class Menu {
 
         println("Введите текст заметки\n0. Сохранить и выйти")
         do {
-            val isExit = getEntryInput().let {
-                input -> if (input == "0") true else content.append("$input\n").isEmpty()
+            val isExit = getEntryInput().let { input ->
+                if (input == "0") true else content.append("$input\n").isEmpty()
             }
         } while (!isExit)
 
@@ -27,11 +27,13 @@ class Menu {
 
     private val openNote: (Note) -> Unit = {
         Decor.makeFrame(it)
+
         do {
             println("0. Выход")
         } while (scanner.nextLine() != "0")
+
         Nav.screens = Nav.removeLast(Nav.screens)
-        showMenu(Nav.archive.data)
+        showMenu(Nav.archive.data, Nav.archive.name)
     }
 
     fun start() { showMenu(Nav.archives) }
@@ -39,21 +41,33 @@ class Menu {
     private fun addEntry(onAdd: (String) -> Unit) {
         println(getText()["Enter"]!!)
         onAdd(getEntryInput())
-        showMenu(Nav.archive.data)
+        showMenu(Nav.archive.data, Nav.archive.name)
     }
 
     private fun getEntryInput(): String {
         var input: String
+
         do {
             input = scanner.nextLine()
-        } while (input.isEmpty().apply { if (this) println("Поле не может быть пустым") })
+        } while (input.isEmpty().apply {
+            if (this) println("Поле не может быть пустым")
+        })
+
         return input
     }
 
-    private fun showMenu(list: List<Data>) {
-        println("${Decor.makeHeader(getText()["List"]!!)}\n${getText()["Create"]!!}")
-        list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
-        Nav.back = (list.size + 1).apply { println("$this. Выход") }
+    private fun showMenu(list: List<Data>, extraText: String = "") {
+        println("${Decor.makeHeader(getText()["List"]!! 
+                + extraText)}\n${getText()["Create"]!!}")
+
+        list.forEachIndexed { i, e ->
+            println("${i + 1}. ${e.name}")
+        }
+
+        Nav.back = (list.size + 1).apply {
+            println("$this. Выход")
+        }
+
         getUserInput()
     }
 
@@ -70,7 +84,7 @@ class Menu {
             when (id) {
                 ARCHIVE -> showMenu(archives)
                 CREATE_ARCHIVE -> addEntry(createArchive)
-                OPEN_ARCHIVE, NOTE -> showMenu(lastArchive.data)
+                OPEN_ARCHIVE, NOTE -> showMenu(lastArchive.data, lastArchive.name)
                 CREATE_NOTE -> addEntry(createNote)
                 OPEN_NOTE -> openNote(archive.data[noteId])
             }
@@ -83,8 +97,14 @@ class Menu {
                 when {
                     it == back -> screens[screens.size - 2]
                     id == CREATE -> if (it == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
-                    id > CREATE && it == NOTE -> { noteId = id - 1; OPEN_ARCHIVE }
-                    id > CREATE && it == OPEN_NOTE -> { noteId = id - 1; OPEN_NOTE }
+                    id > CREATE && it == NOTE -> {
+                        noteId = id - 1
+                        OPEN_ARCHIVE
+                    }
+                    id > CREATE && it == OPEN_NOTE -> {
+                        noteId = id - 1
+                        OPEN_NOTE
+                    }
                     else -> it
                 }
             }
@@ -116,7 +136,9 @@ class Menu {
                     null -> { println("Введите число"); false }
                     CREATE -> true
                     back -> {
-                        id = getCurrentScreen(true).let { if (it == ARCHIVE) EXIT else it }
+                        id = getCurrentScreen(true).let {
+                            if (it == ARCHIVE) EXIT else it
+                        }
                         screens = removeLast(screens)
                         true
                     }
