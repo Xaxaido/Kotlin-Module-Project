@@ -35,8 +35,7 @@ class Menu {
 
         println("Введите текст заметки\n0. Сохранить и выйти")
         do {
-            val isExit =
-                getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
+            val isExit = getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
         } while (!isExit)
 
         Nav.archive.data = Nav.addValue(Nav.archive.data, Note(name, content.toString()))
@@ -52,9 +51,7 @@ class Menu {
         menuScreen(Nav.archive.data)
     }
 
-    fun start() {
-        menuScreen(Nav.archives)
-    }
+    fun start() { menuScreen(Nav.archives) }
 
     private fun getEntryInput(): String {
         var input: String
@@ -84,25 +81,13 @@ class Menu {
         }
     }
 
-    private fun openEntries(id: Int): Int {
-        with (Nav) {
-            return getCurrentScreen(false).let {
-                when {
-                    id > CREATE && it == ARCHIVE -> NOTE
-                    id > CREATE && it == NOTE -> OPEN_NOTE
-                    else -> it
-                }
-            }
-        }
-    }
-
     private fun getScreen(id: Int): Int {
         with (Nav) {
             return getCurrentScreen(false).let {
                 when {
                     it == back -> screens[screens.size - 2]
                     id == CREATE -> if (it == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
-                    id > CREATE && it == NOTE -> { archiveId = id - 1; OPEN_ARCHIVE }
+                    id > CREATE && it == NOTE -> { noteId = id - 1; OPEN_ARCHIVE }
                     id > CREATE && it == OPEN_NOTE -> { noteId = id - 1; OPEN_NOTE }
                     else -> it
                 }
@@ -110,25 +95,35 @@ class Menu {
         }
     }
 
+    private fun getMenuEntry(id: Int): Boolean {
+        with (Nav) {
+            return isOutOfRange(id).apply {
+                if (this) getCurrentScreen(false).let { screen ->
+                    screens = addValue(screens, when {
+                        id > CREATE && screen == ARCHIVE -> NOTE
+                        id > CREATE && screen == NOTE -> OPEN_NOTE
+                        else -> screen
+                    })
+                }
+            }
+        }
+    }
+
     private fun getUserInput() {
         var id: Int?
-        var isCorrect: Boolean
 
         with(Nav) {
             do {
                 id = scanner.nextLine().toIntOrNull()
 
-                isCorrect = when (id) {
+                val isCorrect = when (id) {
                     null -> { println("Введите число"); false }
                     CREATE -> true
                     back -> {
                         id = getCurrentScreen(true).let { if (it == ARCHIVE) EXIT else it }
                         removeLast()
-                        true
                     }
-                    else -> {
-                        isOutOfRange(id!!)?.let { screens = addValue(screens, openEntries(id!!)); true } ?: false
-                    }
+                    else -> getMenuEntry(id!!)
                 }
             } while (!isCorrect)
 
