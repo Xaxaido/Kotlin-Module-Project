@@ -17,31 +17,23 @@ class Menu {
         }
     }
 
-    private val addEntry: (Data) -> Unit = {
-        with(Nav) {
-            println(it.strEnterName)
-            val name = getEntryInput()
-
-            when (it) {
-                is Archive -> {
-                    archives = addValue(archives, Archive(name, listOf()))
-                    archiveId = archives.lastIndex
-                    screens = addValue(screens, NOTE)
-                }
-                is Note -> {
-                    val content = StringBuilder()
-
-                    println("Введите текст заметки\n0. Сохранить и выйти")
-                    do {
-                        val isExit = getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
-                    } while (!isExit)
-
-                    archive.data = addValue(archive.data, Note(name, content.toString()))
-                }
-            }
-
-            menuScreen(archive.data)
+    private val createArchive: (String) -> Unit = {
+        with (Nav) {
+            archives = addValue(archives, Archive(it, listOf()))
+            archiveId = archives.lastIndex
+            screens = addValue(screens, NOTE)
         }
+    }
+
+    private val createNote: (String) -> Unit = {
+        val content = StringBuilder()
+
+        println("Введите текст заметки\n0. Сохранить и выйти")
+        do {
+            val isExit = getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
+        } while (!isExit)
+
+        Nav.archive.data = Nav.addValue(Nav.archive.data, Note(it, content.toString()))
     }
 
     private val openNote: (Note) -> Unit = {
@@ -55,13 +47,17 @@ class Menu {
 
     fun start() { menuScreen(Nav.archives) }
 
+    private fun addEntry(list: Data, onAdd: (String) -> Unit) {
+        println(list.strEnterName)
+        onAdd(getEntryInput())
+        menuScreen(Nav.archive.data)
+    }
+
     private fun getEntryInput(): String {
         var input: String
-
         do {
             input = scanner.nextLine()
         } while (input.isEmpty().apply { if (this) println("Поле не может быть пустым") })
-
         return input
     }
 
@@ -75,9 +71,9 @@ class Menu {
         with(Nav) {
             when (id) {
                 ARCHIVE -> menuScreen(archives)
-                CREATE_ARCHIVE -> addEntry(Archive())
+                CREATE_ARCHIVE -> addEntry(Archive(), createArchive)
                 OPEN_ARCHIVE, NOTE -> menuScreen(lastArchive.data)
-                CREATE_NOTE -> addEntry(Note())
+                CREATE_NOTE -> addEntry(Note(), createNote)
                 OPEN_NOTE -> openNote(archive.data[noteId])
             }
         }
