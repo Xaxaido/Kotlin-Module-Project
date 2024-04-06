@@ -7,8 +7,8 @@ class Menu {
     private val menuScreen: (List<Data>) -> Unit = {
         with(Nav) {
             val data = when (screens.last { screen -> screen < EXIT }) {
-                ARCHIVE -> arrayOf(Archive.STR_LIST, Archive.STR_CREATE)
-                NOTE -> arrayOf("${Note.STR_LIST} ${archive.name}", Note.STR_CREATE)
+                ARCHIVE -> arrayOf(Archive().strList, Archive().strCreate)
+                NOTE -> arrayOf("${Note().strList} ${archive.name}", Note().strCreate)
                 else -> arrayOf()
             }
 
@@ -17,29 +17,31 @@ class Menu {
         }
     }
 
-    private val createArchive: () -> Unit = {
-        println(Archive.STR_ENTER_NAME)
+    private val addEntry: (Data) -> Unit = {
         with(Nav) {
-            archives = addValue(archives, Archive(getEntryInput(), listOf()))
-            archiveId = archives.lastIndex
-            screens = addValue(screens, NOTE)
+            println(it.strEnterName)
+            val name = getEntryInput()
+
+            when (it) {
+                is Archive -> {
+                    archives = addValue(archives, Archive(name, listOf()))
+                    archiveId = archives.lastIndex
+                    screens = addValue(screens, NOTE)
+                }
+                is Note -> {
+                    val content = StringBuilder()
+
+                    println("Введите текст заметки\n0. Сохранить и выйти")
+                    do {
+                        val isExit = getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
+                    } while (!isExit)
+
+                    archive.data = addValue(archive.data, Note(name, content.toString()))
+                }
+            }
+
             menuScreen(archive.data)
         }
-    }
-
-    private val createNote: () -> Unit = {
-        println(Note.STR_ENTER_NAME)
-
-        val name = getEntryInput()
-        val content = StringBuilder()
-
-        println("Введите текст заметки\n0. Сохранить и выйти")
-        do {
-            val isExit = getEntryInput().let { if (it == "0") true else content.append("$it\n").isEmpty() }
-        } while (!isExit)
-
-        Nav.archive.data = Nav.addValue(Nav.archive.data, Note(name, content.toString()))
-        menuScreen(Nav.archive.data)
     }
 
     private val openNote: (Note) -> Unit = {
@@ -73,9 +75,9 @@ class Menu {
         with(Nav) {
             when (id) {
                 ARCHIVE -> menuScreen(archives)
-                CREATE_ARCHIVE -> createArchive()
+                CREATE_ARCHIVE -> addEntry(Archive())
                 OPEN_ARCHIVE, NOTE -> menuScreen(lastArchive.data)
-                CREATE_NOTE -> createNote()
+                CREATE_NOTE -> addEntry(Note())
                 OPEN_NOTE -> openNote(archive.data[noteId])
             }
         }

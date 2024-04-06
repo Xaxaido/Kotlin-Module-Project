@@ -1,12 +1,10 @@
 data class Archive(
 
-    override val name: String,
-    var data: List<Note>
+    override val name: String = "",
+    var data: List<Note> = listOf()
 ) : Data, Mutable {
 
-    companion object {
-        const val STR_LIST = "Cписок архивов"
-        const val STR_CREATE = "0. Создать архив"
-        const val STR_ENTER_NAME = "Введите название архива"
-    }
+    override val strList = "Cписок архивов"
+    override val strCreate = "0. Создать архив"
+    override val strEnterName = "Введите название архива"
 }
