@@ -20,8 +20,7 @@ object Nav : Mutable {
 
     private fun getList() = screens.last { it < EXIT }.let { if (it == ARCHIVE) archives else archive.data }
 
-    fun isOutOfRange(id: Int): Boolean = if (id > getList() .size + 1) { println(Data.OUT_OF_RANGE); false } else true
+    fun isOutOfRange(id: Int): Boolean = if (id > getList().size + 1) { println(Data.OUT_OF_RANGE); false } else true
 
     fun getCurrentScreen(isBack: Boolean) = if (screens.size == 1 && isBack) EXIT else screens.last()
-    override fun removeLast(): Boolean { screens = screens.subList(0, screens.lastIndex); return true }
 }

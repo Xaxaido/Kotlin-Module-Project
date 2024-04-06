@@ -4,7 +4,11 @@ data class Note(
     val content: String = ""
 ) : Data {
 
-    override val strList = "Список заметок архива"
-    override val strCreate = "0. Создать заметку"
-    override val strEnterName = "Введите название заметки"
+    companion object {
+        val text = mapOf (
+            "List" to "Список заметок архива",
+            "Create" to "0. Создать заметку",
+            "Enter" to "Введите название заметки"
+        )
+    }
 }
