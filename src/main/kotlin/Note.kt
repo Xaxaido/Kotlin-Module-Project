@@ -6,7 +6,7 @@ data class Note(
 
     companion object {
         val text = mapOf (
-            "List" to "Список заметок архива",
+            "List" to "Список заметок архива ",
             "Create" to "0. Создать заметку",
             "Enter" to "Введите название заметки"
         )

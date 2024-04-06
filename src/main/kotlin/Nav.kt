@@ -17,10 +17,14 @@ object Nav : Mutable {
         get() = archives[archiveId]
     val lastArchive: Archive
         get() = archives[archives.lastIndex]
+    private val list: List<Data>
+        get() = screens.last { it < EXIT }.let {
+            if (it == ARCHIVE) archives else archive.data
+        }
 
-    private fun getList() = screens.last { it < EXIT }.let { if (it == ARCHIVE) archives else archive.data }
-
-    fun isOutOfRange(id: Int): Boolean = if (id > getList().size + 1) { println(Data.OUT_OF_RANGE); false } else true
+    fun isOutOfRange(id: Int): Boolean = !(id > list.size + 1).apply {
+        if (this) println(Data.OUT_OF_RANGE)
+    }
 
     fun getCurrentScreen(isBack: Boolean) = if (screens.size == 1 && isBack) EXIT else screens.last()
 }

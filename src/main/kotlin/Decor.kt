@@ -11,14 +11,26 @@ class Decor {
 
         fun makeFrame(note: Note) {
 
-            val list = note.content.split("\n").filter(String::isNotEmpty).toList()
-            val width = list.sortedByDescending { it.length }.take(1).toString().length
-            val divider: () -> Unit = { println(DIVIDER.toString().repeat(width + 2 * PADDING + 2)) }
+            val list = note.content.split("\n")
+                .filter(String::isNotEmpty).toList()
 
-            println(makeHeader(note.name, (width - note.name.length + 2 * PADDING) / 2))
+            val width = list.sortedByDescending {it.length }
+                .take(1).toString().length
+
+            val divider: () -> Unit = {
+                println(DIVIDER.toString().repeat(width + 2 * PADDING + 2))
+            }
+
+            println(makeHeader(note.name,
+                        (width - note.name.length + 2 * PADDING) / 2))
+
             list.forEachIndexed { i, e ->
                 if (i == 0) divider()
-                println("$DECOR_SIDE ${" ".repeat(PADDING)}$e${" ".repeat(width - e.length + PADDING / 2)}$DECOR_SIDE")
+
+                println("$DECOR_SIDE ${" "
+                    .repeat(PADDING)}$e${" "
+                    .repeat(width - e.length + PADDING / 2)}$DECOR_SIDE")
+
                 if (i == list.lastIndex) divider()
             }
         }
