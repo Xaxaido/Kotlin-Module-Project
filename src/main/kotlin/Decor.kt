@@ -21,7 +21,9 @@ class Decor {
         }
 
         fun makeHeader(header: String, temp: Int): String {
-            val width = if (temp == 0 || temp <= header.length) ASTERISK_COUNT else (temp - header.length) / 2
+            val width = if (temp == 0 || temp <= header.length) {
+                ASTERISK_COUNT
+            } else (temp - header.length) / 2
 
             return "*".repeat(width).let { "$it $header $it" }
         }
