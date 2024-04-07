@@ -57,8 +57,8 @@ class Menu {
     }
 
     private fun showMenu(list: List<Data>, extraText: String = "") {
-        println("${Decor.makeHeader(getText()["List"]!! 
-                + extraText)}\n${getText()["Create"]!!}")
+        println("${Decor.makeHeader(getText()["List"]!! + extraText, 
+                Decor.getMaxWidth(list))}\n${getText()["Create"]!!}")
 
         list.forEachIndexed { i, e ->
             println("${i + 1}. ${e.name}")
@@ -134,6 +134,7 @@ class Menu {
 
                 val isCorrect = when (id) {
                     null -> { println("Введите число"); false }
+                    in Int.MIN_VALUE until CREATE -> { println(Data.OUT_OF_RANGE); false }
                     CREATE -> true
                     back -> {
                         id = getCurrentScreen(true).let {

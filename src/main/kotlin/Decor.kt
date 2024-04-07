@@ -7,15 +7,30 @@ class Decor {
         private const val DIVIDER = '-'
         private const val DECOR_SIDE = '|'
 
-        fun makeHeader(header: String, width: Int = ASTERISK_COUNT) = "*".repeat(width).let { "$it $header $it" }
+        @Suppress("UNCHECKED_CAST")
+        inline fun <reified T> getMaxWidth(temp: List<T>): Int {
+            val list = if (temp.isNotEmpty()) {
+
+                when (temp.first()) {
+                    is Data -> temp.map { (it as Data).name }
+                    else -> temp as List<String>
+                }
+            } else return 0
+
+            return list.sortedByDescending { it.length }.take(1).toString().length
+        }
+
+        fun makeHeader(header: String, temp: Int): String {
+            val width = if (temp == 0 || temp <= header.length) ASTERISK_COUNT else (temp - header.length) / 2
+
+            return "*".repeat(width).let { "$it $header $it" }
+        }
 
         fun makeFrame(note: Note) {
-
             val list = note.content.split("\n")
                 .filter(String::isNotEmpty).toList()
 
-            val width = list.sortedByDescending {it.length }
-                .take(1).toString().length
+            val width = getMaxWidth(list)
 
             val divider: () -> Unit = {
                 println(DIVIDER.toString().repeat(width + 2 * PADDING + 2))
@@ -33,6 +48,8 @@ class Decor {
 
                 if (i == list.lastIndex) divider()
             }
+
         }
+
     }
 }
