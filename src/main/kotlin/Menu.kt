@@ -6,7 +6,7 @@ class Menu {
 
     private val createArchive: (String) -> Unit = {
         with (Nav) {
-            archives = addValue(archives, Archive(it, listOf()))
+            archives = addValue(archives, Data.Archive(it, listOf()))
             archiveId = archives.lastIndex
             screens = addValue(screens, NOTE)
         }
@@ -18,14 +18,14 @@ class Menu {
         println("Введите текст заметки\n0. Сохранить и выйти")
         do {
             val isExit = getEntryInput().let { input ->
-                if (input == "0") true else content.append("$input\n").isEmpty()
+                if (input == "0") true else content.appendLine(input).isEmpty()
             }
         } while (!isExit)
 
-        Nav.archive.data = Nav.addValue(Nav.archive.data, Note(it, content.toString()))
+        Nav.archive.data = Nav.addValue(Nav.archive.data, Data.Note(it, content.toString()))
     }
 
-    private val openNote: (Note) -> Unit = {
+    private val openNote: (Data.Note) -> Unit = {
         Decor.makeFrame(it)
 
         do {
@@ -39,7 +39,7 @@ class Menu {
     fun start() { showMenu(Nav.archives) }
 
     private fun addEntry(onAdd: (String) -> Unit) {
-        println(getText()["Enter"]!!)
+        println(Nav.text["Enter"]!!)
         onAdd(getEntryInput())
         showMenu(Nav.archive.data, Nav.archive.name)
     }
@@ -57,26 +57,16 @@ class Menu {
     }
 
     private fun showMenu(list: List<Data>, extraText: String = "") {
-        println("${Decor.makeHeader(getText()["List"]!! + extraText, 
-                Decor.getMaxWidth(list))}\n${getText()["Create"]!!}")
+        println(buildString {
+            appendLine(
+                Decor.makeHeader(Nav.text["List"]!! + extraText, Decor.getMaxWidth(list))
+            )
+            append(Nav.text["Create"]!!)
+        })
 
-        list.forEachIndexed { i, e ->
-            println("${i + 1}. ${e.name}")
-        }
-
-        Nav.back = (list.size + 1).apply {
-            println("$this. Выход")
-        }
-
+        list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
+        Nav.back = (list.size + 1).apply { println("$this. Выход") }
         getUserInput()
-    }
-
-    private fun getText(): Map<String, String> {
-        return when (Nav.screens.last { it < Nav.EXIT }) {
-            Nav.ARCHIVE -> Archive.text
-            Nav.NOTE -> Note.text
-            else -> emptyMap()
-        }
     }
 
     private fun draw(id: Int) {
