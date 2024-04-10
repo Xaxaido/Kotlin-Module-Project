@@ -12,15 +12,24 @@ object Nav : Mutable {
     var back = EXIT
     var noteId = -1
     var screens = listOf(ARCHIVE)
-    var archives = listOf<Archive>()
-    val archive: Archive
+    var archives = listOf<Data.Archive>()
+    val archive: Data.Archive
         get() = archives[archiveId]
-    val lastArchive: Archive
+    val lastArchive: Data.Archive
         get() = archives[archives.lastIndex]
-    private val list: List<Data>
-        get() = screens.last { it < EXIT }.let {
-            if (it == ARCHIVE) archives else archive.data
+    private val list
+        @Suppress("UNCHECKED_CAST")
+        get() = get("list") as List<Data>
+    val text
+        @Suppress("UNCHECKED_CAST")
+        get() = get("text") as Map<String, String>
+
+    private fun get(what: String): Any {
+        return when (screens.last { it < EXIT }) {
+            ARCHIVE -> if (what == "list") archives else Data.Archive.text
+            else -> if (what == "list") archive.data else Data.Note.text
         }
+    }
 
     fun isOutOfRange(id: Int): Boolean = !(id > list.size + 1).apply {
         if (this) println(Data.OUT_OF_RANGE)

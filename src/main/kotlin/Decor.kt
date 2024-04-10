@@ -8,34 +8,32 @@ class Decor {
         private const val DECOR_SIDE = '|'
 
         @Suppress("UNCHECKED_CAST")
-        inline fun <reified T> getMaxWidth(temp: List<T>): Int {
-            val list = if (temp.isNotEmpty()) {
+        inline fun <reified T> getMaxWidth(list: List<T>): Int {
+            val result = if (list.isNotEmpty()) {
 
-                when (temp.first()) {
-                    is Data -> temp.map { (it as Data).name }
-                    else -> temp as List<String>
+                when (list.first()) {
+                    is Data -> list.map { (it as Data).name }
+                    else -> list as List<String>
                 }
             } else return 0
 
-            return list.sortedByDescending { it.length }.take(1).toString().length
+            return result.sortedByDescending { it.length }.take(1).toString().length
         }
 
-        fun makeHeader(header: String, temp: Int): String {
-            val width = if (temp == 0 || temp <= header.length) {
-                ASTERISK_COUNT
-            } else (temp - header.length) / 2
-
-            return "*".repeat(width).let { "$it $header $it" }
+        fun makeHeader(header: String, width: Int): String {
+            return "*".repeat(
+                if (width == 0 || width <= header.length) ASTERISK_COUNT else width
+            ).let { "$it $header $it" }
         }
 
-        fun makeFrame(note: Note) {
+        fun makeFrame(note: Data.Note) {
             val list = note.content.split("\n")
                 .filter(String::isNotEmpty).toList()
 
             val width = getMaxWidth(list)
 
             val divider: () -> Unit = {
-                println(DIVIDER.toString().repeat(width + 2 * PADDING + 2))
+                println("+${DIVIDER.toString().repeat(width + 2 * PADDING)}+")
             }
 
             println(makeHeader(note.name,
@@ -52,6 +50,6 @@ class Decor {
             }
 
         }
-
+        
     }
 }
