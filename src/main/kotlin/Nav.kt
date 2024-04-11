@@ -1,4 +1,4 @@
-object Nav : Mutable {
+object Nav {
 
     const val CREATE = 0
     const val EXIT = -1
@@ -30,6 +30,15 @@ object Nav : Mutable {
             else -> if (what == "list") archive.data else Data.Note.text
         }
     }
+
+    fun add(value: Any) {
+        when (value) {
+            is Data.Archive -> archives = archives.toList() + value
+            else -> screens = screens.toList() + value as Int
+        }
+    }
+
+    fun removeLast() { screens = screens.subList(0, screens.lastIndex) }
 
     fun isOutOfRange(id: Int): Boolean = !(id > list.size + 1).apply {
         if (this) println(Data.OUT_OF_RANGE)

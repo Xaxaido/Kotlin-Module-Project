@@ -6,9 +6,9 @@ class Menu {
 
     private val createArchive: (String) -> Unit = {
         with (Nav) {
-            archives = addValue(archives, Data.Archive(it, listOf()))
+            add(Data.Archive(it, listOf()))
             archiveId = archives.lastIndex
-            screens = addValue(screens, NOTE)
+            add(NOTE)
         }
     }
 
@@ -22,7 +22,7 @@ class Menu {
             }
         } while (!isExit)
 
-        Nav.archive.data = Nav.addValue(Nav.archive.data, Data.Note(it, content.toString()))
+        Nav.archives[Nav.archiveId].add(Data.Note(it, content.toString()))
     }
 
     private val openNote: (Data.Note) -> Unit = {
@@ -32,14 +32,14 @@ class Menu {
             println("0. Выход")
         } while (scanner.nextLine() != "0")
 
-        Nav.screens = Nav.removeLast(Nav.screens)
+        Nav.removeLast()
         showMenu(Nav.archive.data, Nav.archive.name)
     }
 
     fun start() { showMenu(Nav.archives) }
 
     private fun addEntry(onAdd: (String) -> Unit) {
-        println(Nav.text["Enter"]!!)
+        println(Nav.text["EnterName"]!!)
         onAdd(getEntryInput())
         showMenu(Nav.archive.data, Nav.archive.name)
     }
@@ -101,20 +101,6 @@ class Menu {
         }
     }
 
-    private fun getMenuEntry(id: Int): Boolean {
-        with (Nav) {
-            return isOutOfRange(id).apply {
-                if (this) getCurrentScreen(false).let { screen ->
-                    screens = addValue(screens, when {
-                        id > CREATE && screen == ARCHIVE -> NOTE
-                        id > CREATE && screen == NOTE -> OPEN_NOTE
-                        else -> screen
-                    })
-                }
-            }
-        }
-    }
-
     private fun getUserInput() {
         var id: Int?
 
@@ -130,10 +116,19 @@ class Menu {
                         id = getCurrentScreen(true).let {
                             if (it == ARCHIVE) EXIT else it
                         }
-                        screens = removeLast(screens)
+                        removeLast()
                         true
                     }
-                    else -> getMenuEntry(id!!)
+                    else -> {
+                        isOutOfRange(id!!).apply {
+                            if (this) getCurrentScreen(false).let { screen ->
+                                add(when {
+                                    id!! > CREATE -> if (screen == ARCHIVE) NOTE else OPEN_NOTE
+                                    else -> screen
+                                })
+                            }
+                        }
+                    }
                 }
             } while (!isCorrect)
 

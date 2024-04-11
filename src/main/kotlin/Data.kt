@@ -1,17 +1,17 @@
-sealed class Data(val name: String) {
+sealed class Data(
+    val name: String
+) {
 
     class Archive(
 
         name: String = "",
         var data: List<Note> = listOf()
-    ) : Data(name), Mutable {
+    ) : Data(name) {
+
+        fun add(value: Note) { data = data.toList() + value }
 
         companion object {
-            val text = mapOf(
-                "List" to "Cписок архивов",
-                "Create" to "0. Создать архив",
-                "Enter" to "Введите название архива",
-            )
+            val text = getText(listOf("архивов", "архив", "архива"))
         }
     }
 
@@ -22,15 +22,17 @@ sealed class Data(val name: String) {
     ) : Data(name) {
 
         companion object {
-            val text = mapOf (
-                "List" to "Список заметок архива ",
-                "Create" to "0. Создать заметку",
-                "Enter" to "Введите название заметки",
-            )
+            val text = getText(listOf("заметок архива ", "заметку", "заметки"))
         }
     }
 
     companion object {
         const val OUT_OF_RANGE = "Элемента с таким номером не существует"
+
+        protected fun getText(args: List<String>) = mapOf(
+            "List" to "Cписок ${args[0]}",
+            "Create" to "0. Создать ${args[1]}",
+            "EnterName" to "Введите название ${args[2]}",
+        )
     }
 }
