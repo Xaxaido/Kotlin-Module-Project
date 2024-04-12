@@ -29,9 +29,7 @@ class Decor {
         fun makeFrame(note: Data.Note) {
             val list = note.content.split("\n")
                 .filter(String::isNotEmpty).toList()
-
             val width = getMaxWidth(list)
-
             val divider: () -> Unit = {
                 println("+${DIVIDER.toString().repeat(width + 2 * PADDING)}+")
             }

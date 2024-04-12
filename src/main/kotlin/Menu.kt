@@ -57,13 +57,8 @@ class Menu {
     }
 
     private fun showMenu(list: List<Data>, extraText: String = "") {
-        println(buildString {
-            appendLine(
-                Decor.makeHeader(Nav.text["List"]!! + extraText, Decor.getMaxWidth(list))
-            )
-            append(Nav.text["Create"]!!)
-        })
-
+        println(Decor.makeHeader(Nav.text["List"]!! + extraText, Decor.getMaxWidth(list)))
+        println((Nav.text["Create"]!!))
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
         Nav.back = (list.size + 1).apply { println("$this. Выход") }
         getUserInput()
@@ -87,14 +82,11 @@ class Menu {
                 when {
                     it == back -> screens[screens.size - 2]
                     id == CREATE -> if (it == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
-                    id > CREATE && it == NOTE -> {
-                        noteId = id - 1
-                        OPEN_ARCHIVE
-                    }
-                    id > CREATE && it == OPEN_NOTE -> {
-                        noteId = id - 1
-                        OPEN_NOTE
-                    }
+                    id > CREATE -> if (it == NOTE) {
+                            noteId = id - 1; OPEN_ARCHIVE
+                        } else {
+                            noteId = id - 1; OPEN_NOTE
+                        }
                     else -> it
                 }
             }
@@ -113,18 +105,12 @@ class Menu {
                     CREATE -> true
                     back -> {
                         id = screens.last().let { if (it == ARCHIVE) EXIT else it }
-                        screens -= screens.last()
-                        true
+                        screens -= screens.last(); true
                     }
                     in list.size + 1 until Int.MAX_VALUE,
                     in Int.MIN_VALUE until CREATE -> { println(Data.OUT_OF_RANGE); false }
                     else -> {
-                        screens.last().let { screen ->
-                            screens += when {
-                                id!! > CREATE -> if (screen == ARCHIVE) NOTE else OPEN_NOTE
-                                else -> screen
-                            }
-                        }
+                        screens += if (screens.last() == ARCHIVE) NOTE else OPEN_NOTE
                         true
                     }
                 }

@@ -10,20 +10,18 @@ object Nav {
     const val OPEN_NOTE = -7
     var back = EXIT
     var archiveId = 0
-    var noteId = -1
+    var noteId = 0
     var screens = listOf(ARCHIVE)
-    var archives = emptyList<Data.Archive>()
-    val archive: Data.Archive
+    var archives = listOf<Data.Archive>()
+    val archive
         get() = if (archives.isNotEmpty()) archives[archiveId] else Data.Archive()
-    val text
-        @Suppress("UNCHECKED_CAST")
-        get() = get(Data.Archive.text, Data.Note.text) as Map<String, String>
     val list
-        @Suppress("UNCHECKED_CAST")
-        get() = get(archives, archive.data) as List<Data>
+        get() = get(listOf(archives, archive.data))
+    val text
+        get() = get(listOf(Data.Archive.text, Data.Note.text))
 
-    private fun get(val1: Any, val2: Any) = when (screens.last { it < EXIT }) {
-        ARCHIVE -> val1
-        else -> val2
+    private fun <T> get(list: List<T>) = when (screens.last { it < EXIT }) {
+        ARCHIVE -> list[0]
+        else -> list[1]
     }
 }
