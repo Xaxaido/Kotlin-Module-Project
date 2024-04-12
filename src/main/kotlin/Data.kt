@@ -24,6 +24,7 @@ sealed class Data(
 
     companion object {
         const val OUT_OF_RANGE = "Элемента с таким номером не существует"
+        const val EMPTY_INPUT = "Поле не может быть пустым"
 
         protected fun getText(args: List<String>) = mapOf(
             "List" to "Cписок ${args[0]}",

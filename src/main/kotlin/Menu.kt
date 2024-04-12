@@ -27,11 +27,9 @@ class Menu {
 
     private val openNote: (Data.Note) -> Unit = {
         Decor.makeFrame(it)
-
         do {
             println("0. Выход")
         } while (scanner.nextLine() != "0")
-
         Nav.screens -= Nav.screens.last()
         showMenu(Nav.archive.data, Nav.archive.name)
     }
@@ -44,20 +42,16 @@ class Menu {
         showMenu(Nav.archive.data, Nav.archive.name)
     }
 
-    private fun getEntryInput(): String {
+    private fun getEntryInput() = run {
         var input: String
-
         do {
             input = scanner.nextLine()
-        } while (input.isEmpty().apply {
-            if (this) println("Поле не может быть пустым")
-        })
-
-        return input
+        } while (input.isEmpty().apply { if (this) println(Data.EMPTY_INPUT) })
+        input
     }
 
-    private fun showMenu(list: List<Data>, extraText: String = "") {
-        println(Decor.makeHeader(Nav.text["List"]!! + extraText, Decor.getMaxWidth(list)))
+    private fun showMenu(list: List<Data>, extra: String = "") {
+        println(Decor.makeHeader(Nav.text["List"]!! + extra, Decor.getMaxWidth(list)))
         println((Nav.text["Create"]!!))
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
         Nav.back = (list.size + 1).apply { println("$this. Выход") }
@@ -76,47 +70,41 @@ class Menu {
         }
     }
 
-    private fun getScreen(id: Int): Int {
-        with (Nav) {
-            return screens.last().let {
-                when {
-                    it == back -> screens[screens.size - 2]
-                    id == CREATE -> if (it == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
-                    id > CREATE -> if (it == NOTE) {
-                            noteId = id - 1; OPEN_ARCHIVE
-                        } else {
-                            noteId = id - 1; OPEN_NOTE
-                        }
-                    else -> it
+    private fun getScreen(id: Int) = with (Nav) {
+        val screen = screens.last()
+        when {
+            screen == back -> screens[screens.size - 2]
+            id == CREATE -> if (screen == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
+            id > CREATE -> if (screen== NOTE) {
+                    noteId = id - 1; OPEN_ARCHIVE
+                } else {
+                    noteId = id - 1; OPEN_NOTE
                 }
-            }
+            else -> screen
         }
     }
 
-    private fun getUserInput() {
+    private fun getUserInput() = with(Nav) {
         var id: Int?
+        do {
+            id = scanner.nextLine().toIntOrNull()
 
-        with(Nav) {
-            do {
-                id = scanner.nextLine().toIntOrNull()
-
-                val isCorrect = when (id) {
-                    null -> { println("Введите число"); false }
-                    CREATE -> true
-                    back -> {
-                        id = screens.last().let { if (it == ARCHIVE) EXIT else it }
-                        screens -= screens.last(); true
-                    }
-                    in list.size + 1 until Int.MAX_VALUE,
-                    in Int.MIN_VALUE until CREATE -> { println(Data.OUT_OF_RANGE); false }
-                    else -> {
-                        screens += if (screens.last() == ARCHIVE) NOTE else OPEN_NOTE
-                        true
-                    }
+            val isCorrect = when (id) {
+                null -> { println("Введите число"); false }
+                CREATE -> true
+                back -> {
+                    id = screens.last().let { if (it == ARCHIVE) EXIT else it }
+                    screens -= screens.last(); true
                 }
-            } while (!isCorrect)
+                in list.size + 1 until Int.MAX_VALUE,
+                in Int.MIN_VALUE until CREATE -> { println(Data.OUT_OF_RANGE); false }
+                else -> {
+                    screens += if (screens.last() == ARCHIVE) NOTE else OPEN_NOTE
+                    true
+                }
+            }
+        } while (!isCorrect)
 
-            if (id == EXIT) return else draw(getScreen(id!!))
-        }
+        if (id == EXIT) return else draw(getScreen(id!!))
     }
 }
