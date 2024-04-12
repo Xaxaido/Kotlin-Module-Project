@@ -6,9 +6,9 @@ class Menu {
 
     private val createArchive: (String) -> Unit = {
         with (Nav) {
-            add(Data.Archive(it, listOf()))
+            archives += Data.Archive(it, listOf())
             archiveId = archives.lastIndex
-            add(NOTE)
+            screens += NOTE
         }
     }
 
@@ -22,7 +22,7 @@ class Menu {
             }
         } while (!isExit)
 
-        Nav.archives[Nav.archiveId].add(Data.Note(it, content.toString()))
+        Nav.archives[Nav.archiveId].data += Data.Note(it, content.toString())
     }
 
     private val openNote: (Data.Note) -> Unit = {
@@ -32,14 +32,14 @@ class Menu {
             println("0. Выход")
         } while (scanner.nextLine() != "0")
 
-        Nav.removeLast()
+        Nav.screens -= Nav.screens.last()
         showMenu(Nav.archive.data, Nav.archive.name)
     }
 
     fun start() { showMenu(Nav.archives) }
 
     private fun addEntry(onAdd: (String) -> Unit) {
-        println(Nav.text["EnterName"]!!)
+        println(Nav.text["EnterName"])
         onAdd(getEntryInput())
         showMenu(Nav.archive.data, Nav.archive.name)
     }
@@ -74,7 +74,7 @@ class Menu {
             when (id) {
                 ARCHIVE -> showMenu(archives)
                 CREATE_ARCHIVE -> addEntry(createArchive)
-                OPEN_ARCHIVE, NOTE -> showMenu(lastArchive.data, lastArchive.name)
+                OPEN_ARCHIVE, NOTE -> showMenu(archives.last().data, archives.last().name)
                 CREATE_NOTE -> addEntry(createNote)
                 OPEN_NOTE -> openNote(archive.data[noteId])
             }
@@ -83,7 +83,7 @@ class Menu {
 
     private fun getScreen(id: Int): Int {
         with (Nav) {
-            return getCurrentScreen(false).let {
+            return screens.last().let {
                 when {
                     it == back -> screens[screens.size - 2]
                     id == CREATE -> if (it == ARCHIVE) CREATE_ARCHIVE else CREATE_NOTE
@@ -113,20 +113,23 @@ class Menu {
                     in Int.MIN_VALUE until CREATE -> { println(Data.OUT_OF_RANGE); false }
                     CREATE -> true
                     back -> {
-                        id = getCurrentScreen(true).let {
+                        id = screens.last().let {
                             if (it == ARCHIVE) EXIT else it
                         }
-                        removeLast()
+                        screens -= screens.last()
                         true
                     }
                     else -> {
-                        isOutOfRange(id!!).apply {
-                            if (this) getCurrentScreen(false).let { screen ->
-                                add(when {
+                        if (id!! > list.size + 1) {
+                            println(Data.OUT_OF_RANGE); false
+                        } else {
+                            screens.last().let { screen ->
+                                screens += when {
                                     id!! > CREATE -> if (screen == ARCHIVE) NOTE else OPEN_NOTE
                                     else -> screen
-                                })
+                                }
                             }
+                            true
                         }
                     }
                 }

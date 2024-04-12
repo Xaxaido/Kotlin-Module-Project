@@ -3,12 +3,9 @@ sealed class Data(
 ) {
 
     class Archive(
-
         name: String = "",
         var data: List<Note> = listOf()
     ) : Data(name) {
-
-        fun add(value: Note) { data = data.toList() + value }
 
         companion object {
             val text = getText(listOf("архивов", "архив", "архива"))
@@ -16,7 +13,6 @@ sealed class Data(
     }
 
     class Note(
-
         name: String = "",
         val content: String = ""
     ) : Data(name) {
