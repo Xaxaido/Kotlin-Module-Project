@@ -8,21 +8,22 @@ object Nav {
     const val NOTE = -5
     const val CREATE_NOTE = -6
     const val OPEN_NOTE = -7
-    var archiveId = 0
     var back = EXIT
+    var archiveId = 0
     var noteId = -1
     var screens = listOf(ARCHIVE)
-    var archives = listOf<Data.Archive>()
+    var archives = emptyList<Data.Archive>()
     val archive: Data.Archive
-        get() = archives[archiveId]
+        get() = if (archives.isNotEmpty()) archives[archiveId] else Data.Archive()
+    val text
+        @Suppress("UNCHECKED_CAST")
+        get() = get(Data.Archive.text, Data.Note.text) as Map<String, String>
     val list
-        get(): List<Data> {
-            return when (screens.last { it < EXIT }) {
-                ARCHIVE -> { text = Data.Archive.text; archives }
-                else -> { text = Data.Note.text; archive.data }
-            }
-        }
-    var text = mapOf<String, String>()
+        @Suppress("UNCHECKED_CAST")
+        get() = get(archives, archive.data) as List<Data>
 
-    init { list }
+    private fun get(val1: Any, val2: Any) = when (screens.last { it < EXIT }) {
+        ARCHIVE -> val1
+        else -> val2
+    }
 }

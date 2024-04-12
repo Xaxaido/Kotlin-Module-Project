@@ -4,7 +4,7 @@ sealed class Data(
 
     class Archive(
         name: String = "",
-        var data: List<Note> = listOf()
+        var data: List<Note> = emptyList()
     ) : Data(name) {
 
         companion object {

@@ -110,27 +110,22 @@ class Menu {
 
                 val isCorrect = when (id) {
                     null -> { println("Введите число"); false }
-                    in Int.MIN_VALUE until CREATE -> { println(Data.OUT_OF_RANGE); false }
                     CREATE -> true
                     back -> {
-                        id = screens.last().let {
-                            if (it == ARCHIVE) EXIT else it
-                        }
+                        id = screens.last().let { if (it == ARCHIVE) EXIT else it }
                         screens -= screens.last()
                         true
                     }
+                    in list.size + 1 until Int.MAX_VALUE,
+                    in Int.MIN_VALUE until CREATE -> { println(Data.OUT_OF_RANGE); false }
                     else -> {
-                        if (id!! > list.size + 1) {
-                            println(Data.OUT_OF_RANGE); false
-                        } else {
-                            screens.last().let { screen ->
-                                screens += when {
-                                    id!! > CREATE -> if (screen == ARCHIVE) NOTE else OPEN_NOTE
-                                    else -> screen
-                                }
+                        screens.last().let { screen ->
+                            screens += when {
+                                id!! > CREATE -> if (screen == ARCHIVE) NOTE else OPEN_NOTE
+                                else -> screen
                             }
-                            true
                         }
+                        true
                     }
                 }
             } while (!isCorrect)
