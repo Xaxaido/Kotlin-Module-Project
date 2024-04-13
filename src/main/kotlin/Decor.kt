@@ -18,8 +18,7 @@ class Decor {
         }
 
         fun makeHeader(header: String, width: Int) = "*".repeat(
-            if (width == 0 || width <= header.length) 5 else width)
-                .let { "$it $header $it" }
+            if (width == 0 || width <= header.length) 5 else width).let { "$it $header $it" }
 
         fun makeFrame(note: Data.Note) {
             val list = note.content.split("\n").filter(String::isNotEmpty).toList()

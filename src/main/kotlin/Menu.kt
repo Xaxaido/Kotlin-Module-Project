@@ -14,33 +14,16 @@ class Menu {
 
     private val createNote: (String) -> Unit = {
         val content = StringBuilder()
-
         println(Data.Note.STR_CREATE_NOTE)
         do {
             val isExit = getEntryInput().let { input ->
                 if (input == "0") true else content.appendLine(input).isEmpty()
             }
         } while (!isExit)
-
         Nav.archives[Nav.archiveId].data += Data.Note(it, content.toString())
     }
 
-    private val openNote: (Data.Note) -> Unit = {
-        Decor.makeFrame(it)
-        do {
-            println("0${Nav.STR_EXIT}")
-        } while (scanner.nextLine() != "0")
-        Nav.screens -= Nav.screens.last()
-        showMenu(Nav.archive.data, Nav.archive.name)
-    }
-
     fun start() { showMenu(Nav.archives) }
-
-    private fun addEntry(onAdd: (String) -> Unit) {
-        println(Nav.text["EnterName"])
-        onAdd(getEntryInput())
-        showMenu(Nav.archive.data, Nav.archive.name)
-    }
 
     private fun getEntryInput() = run {
         var input: String
@@ -48,6 +31,21 @@ class Menu {
             input = scanner.nextLine()
         } while (input.isEmpty().apply { if (this) println(Data.EMPTY_INPUT) })
         input
+    }
+
+    private fun addEntry(onAdd: (String) -> Unit) {
+        println(Nav.text["EnterName"])
+        onAdd(getEntryInput())
+        showMenu(Nav.archive.data, Nav.archive.name)
+    }
+
+    private fun openNote(note: Data.Note) = with(Nav) {
+        Decor.makeFrame(note)
+        do {
+            println("0${STR_EXIT}")
+        } while (scanner.nextLine() != "0")
+        screens -= screens.last()
+        showMenu(archive.data, archive.name)
     }
 
     private fun showMenu(list: List<Data>, extra: String = "") {
@@ -58,15 +56,13 @@ class Menu {
         getUserInput()
     }
 
-    private fun draw(id: Int) {
-        with(Nav) {
-            when (id) {
-                ARCHIVE -> showMenu(archives)
-                CREATE_ARCHIVE -> addEntry(createArchive)
-                OPEN_ARCHIVE, NOTE -> showMenu(archives.last().data, archives.last().name)
-                CREATE_NOTE -> addEntry(createNote)
-                OPEN_NOTE -> openNote(archive.data[noteId])
-            }
+    private fun draw(id: Int) = with(Nav) {
+        when (id) {
+            ARCHIVE -> showMenu(archives)
+            CREATE_ARCHIVE -> addEntry(createArchive)
+            OPEN_ARCHIVE, NOTE -> showMenu(archives.last().data, archives.last().name)
+            CREATE_NOTE -> addEntry(createNote)
+            OPEN_NOTE -> openNote(archive.data[noteId])
         }
     }
 
@@ -88,7 +84,6 @@ class Menu {
         var id: Int?
         do {
             id = scanner.nextLine().toIntOrNull()
-
             val isCorrect = when (id) {
                 null -> { println(Data.NOT_NUMBER); false }
                 CREATE -> true
@@ -104,7 +99,6 @@ class Menu {
                 }
             }
         } while (!isCorrect)
-
         if (id == EXIT) return else draw(getScreen(id!!))
     }
 }
