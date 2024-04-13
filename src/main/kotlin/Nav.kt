@@ -8,6 +8,7 @@ object Nav {
     const val NOTE = -5
     const val CREATE_NOTE = -6
     const val OPEN_NOTE = -7
+    const val STR_EXIT = ". Выход"
     var back = EXIT
     var archiveId = 0
     var noteId = 0

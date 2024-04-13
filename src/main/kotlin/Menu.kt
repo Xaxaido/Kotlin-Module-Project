@@ -15,7 +15,7 @@ class Menu {
     private val createNote: (String) -> Unit = {
         val content = StringBuilder()
 
-        println("Введите текст заметки\n0. Сохранить и выйти")
+        println(Data.Note.STR_CREATE_NOTE)
         do {
             val isExit = getEntryInput().let { input ->
                 if (input == "0") true else content.appendLine(input).isEmpty()
@@ -28,7 +28,7 @@ class Menu {
     private val openNote: (Data.Note) -> Unit = {
         Decor.makeFrame(it)
         do {
-            println("0. Выход")
+            println("0${Nav.STR_EXIT}")
         } while (scanner.nextLine() != "0")
         Nav.screens -= Nav.screens.last()
         showMenu(Nav.archive.data, Nav.archive.name)
@@ -54,7 +54,7 @@ class Menu {
         println(Decor.makeHeader(Nav.text["List"]!! + extra, Decor.getMaxWidth(list)))
         println((Nav.text["Create"]!!))
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
-        Nav.back = (list.size + 1).apply { println("$this. Выход") }
+        Nav.back = (list.size + 1).apply { println("$this${Nav.STR_EXIT}") }
         getUserInput()
     }
 
@@ -90,7 +90,7 @@ class Menu {
             id = scanner.nextLine().toIntOrNull()
 
             val isCorrect = when (id) {
-                null -> { println("Введите число"); false }
+                null -> { println(Data.NOT_NUMBER); false }
                 CREATE -> true
                 back -> {
                     id = screens.last().let { if (it == ARCHIVE) EXIT else it }
