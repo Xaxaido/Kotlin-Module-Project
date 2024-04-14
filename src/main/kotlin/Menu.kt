@@ -1,8 +1,6 @@
-import java.util.Scanner
-
 class Menu {
 
-    private val scanner = Scanner(System.`in`)
+    private val input = Input()
 
     private val createArchive: (String) -> Unit = {
         with (Nav) {
@@ -16,7 +14,7 @@ class Menu {
         val content = StringBuilder()
         println(Data.Note.STR_CREATE_NOTE)
         do {
-            val isExit = getEntryInput().let { input ->
+            val isExit = input.getEntryInput().let { input ->
                 if (input == "0") true else content.appendLine(input).isEmpty()
             }
         } while (!isExit)
@@ -25,17 +23,9 @@ class Menu {
 
     fun start() { showMenu(Nav.archives) }
 
-    private fun getEntryInput() = run {
-        var input: String
-        do {
-            input = scanner.nextLine()
-        } while (input.isEmpty().apply { if (this) println(Data.EMPTY_INPUT) })
-        input
-    }
-
     private fun addEntry(onAdd: (String) -> Unit) {
         println(Nav.text["EnterName"])
-        onAdd(getEntryInput())
+        onAdd(input.getEntryInput())
         showMenu(Nav.archive.data, Nav.archive.name)
     }
 
@@ -43,17 +33,17 @@ class Menu {
         Decor.makeFrame(note)
         do {
             println("0${STR_EXIT}")
-        } while (scanner.nextLine() != "0")
+        } while (input.scanner.nextLine() != "0")
         screens -= screens.last()
         showMenu(archive.data, archive.name)
     }
 
     private fun showMenu(list: List<Data>, extra: String = "") {
-        println(Decor.makeHeader(Nav.text["List"]!! + extra, Decor.getMaxWidth(list)))
+        Decor.makeHeader(Nav.text["List"]!! + extra)
         println((Nav.text["Create"]!!))
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
         Nav.back = (list.size + 1).apply { println("$this${Nav.STR_EXIT}") }
-        getUserInput()
+        getMenuId()
     }
 
     private fun draw(id: Int) = with(Nav) {
@@ -80,25 +70,6 @@ class Menu {
         }
     }
 
-    private fun getUserInput() = with(Nav) {
-        var id: Int?
-        do {
-            id = scanner.nextLine().toIntOrNull()
-            val isCorrect = when (id) {
-                null -> { println(Data.NOT_NUMBER); false }
-                CREATE -> true
-                back -> {
-                    id = screens.last().let { if (it == ARCHIVE) EXIT else it }
-                    screens -= screens.last(); true
-                }
-                in list.size + 1 until Int.MAX_VALUE,
-                in Int.MIN_VALUE until CREATE -> { println(Data.OUT_OF_RANGE); false }
-                else -> {
-                    screens += if (screens.last() == ARCHIVE) NOTE else OPEN_NOTE
-                    true
-                }
-            }
-        } while (!isCorrect)
-        if (id == EXIT) return else draw(getScreen(id!!))
-    }
+    private fun getMenuId() =
+        input.getUserInput().let { if (it == Nav.EXIT) return else draw(getScreen(it!!)) }
 }

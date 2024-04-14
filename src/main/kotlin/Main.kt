@@ -1,4 +1,1 @@
-fun main() {
-    val menu = Menu()
-    menu.start()
-}
+fun main() = Menu().start()
