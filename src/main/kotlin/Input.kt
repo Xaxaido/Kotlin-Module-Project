@@ -4,19 +4,17 @@ class Input {
 
     val scanner = Scanner(System.`in`)
 
-    fun getEntryInput() = run {
+    fun getUserInput() = run {
         var input: String
 
         do {
             input = scanner.nextLine()
-        } while (input.isEmpty().apply {
-            if (this) println(Data.EMPTY_INPUT)
-        })
+        } while (input.isEmpty().apply { if (this) println(Data.EMPTY_INPUT) })
 
         input
     }
 
-    fun getUserInput() = with(Nav) {
+    fun getMenuInput() = with(Nav) {
         var id: Int?
 
         do {

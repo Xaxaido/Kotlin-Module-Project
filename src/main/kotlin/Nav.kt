@@ -14,6 +14,11 @@ object Nav {
     var noteId = 0
     var screens = listOf(ARCHIVE)
     var archives = listOf<Data.Archive>()
+        set(value) {
+            field = value
+            archiveId = archives.lastIndex
+            screens += NOTE
+        }
     val archive
         get() = if (archives.isNotEmpty()) archives[archiveId] else Data.Archive()
     val list
