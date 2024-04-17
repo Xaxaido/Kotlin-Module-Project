@@ -28,8 +28,8 @@ sealed class Data(
         const val EMPTY_INPUT = "Поле не может быть пустым"
         const val NOT_NUMBER = "Введите число"
 
-        protected fun getText(args: List<String>) = mapOf(
-            "List" to "Cписок ${args[0]}",
+        private fun getText(args: List<String>) = mapOf(
+            "List" to "Список ${args[0]}",
             "Create" to "0. Создать ${args[1]}",
             "EnterName" to "Введите название ${args[2]}",
         )

@@ -16,7 +16,6 @@ object Nav {
     var archives = listOf<Data.Archive>()
         set(value) {
             field = value
-            archiveId = archives.lastIndex
             screens += NOTE
         }
     val archive
@@ -30,4 +29,6 @@ object Nav {
         ARCHIVE -> list[0]
         else -> list[1]
     }
+
+    fun back() { screens -= screens.last() }
 }
