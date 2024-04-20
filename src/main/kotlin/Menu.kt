@@ -2,13 +2,30 @@ class Menu {
 
     private val input = Input()
 
-    private val createNote: (String) -> Unit = {
+    private val createNote: () -> Any = {
         val content = StringBuilder()
         println(Data.Note.STR_CREATE_NOTE)
         do {
             val input = input.getUserInput()
         } while ((input != "0").apply { if (this) content.appendLine(input) })
-        Nav.archive.data += Data.Note(it, content.toString())
+        content
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private inline fun <reified T> add(list: MutableList<T>, onAdd: () -> Any = {}) = with (Nav) {
+        println(text["EnterName"])
+        val name = input.getUserInput()
+
+        when(T::class.java) {
+            Data.Archive::class.java -> {
+                (list as MutableList<Data.Archive>).add(Data.Archive(name, mutableListOf()))
+                screens += NOTE
+            }
+            Data.Note::class.java -> {
+                (list as MutableList<Data.Note>).add(Data.Note(name, onAdd().toString()))
+            }
+        }
+        showMenu(archive.data, archive.name)
     }
 
     fun start() { draw(Nav.ARCHIVE) }
@@ -19,12 +36,6 @@ class Menu {
             println("0${STR_EXIT}")
         } while (readln() != "0")
         back()
-        showMenu(archive.data, archive.name)
-    }
-
-    private fun addEntry(onAdd: (String) -> Unit) = with (Nav) {
-        println(text["EnterName"])
-        onAdd(input.getUserInput())
         showMenu(archive.data, archive.name)
     }
 
@@ -39,9 +50,9 @@ class Menu {
     private fun draw(screen: Int) = with (Nav) {
         when (screen) {
             ARCHIVE -> showMenu(archives)
-            CREATE_ARCHIVE -> addEntry { archives += Data.Archive(it, listOf()) }
+            CREATE_ARCHIVE -> add<Data.Archive>(archives)
             OPEN_ARCHIVE, NOTE -> showMenu(archive.data, archive.name)
-            CREATE_NOTE -> addEntry(createNote)
+            CREATE_NOTE -> add<Data.Note>(archive.data, createNote)
             OPEN_NOTE -> openNote(archive.data[noteId])
         }
     }

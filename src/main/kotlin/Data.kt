@@ -4,7 +4,7 @@ sealed class Data(
 
     class Archive(
         name: String = "",
-        var data: List<Note> = emptyList()
+        val data: MutableList<Note> = mutableListOf()
     ) : Data(name) {
 
         companion object {
@@ -25,6 +25,7 @@ sealed class Data(
 
     companion object {
         const val OUT_OF_RANGE = "Элемента с таким номером не существует"
+        const val DUPLICATE = "Элемент с таким именем уже существует"
         const val EMPTY_INPUT = "Поле не может быть пустым"
         const val NOT_NUMBER = "Введите число"
 

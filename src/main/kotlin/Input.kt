@@ -4,7 +4,12 @@ class Input {
         var input: String
         do {
             input = readln()
-        } while (input.isEmpty().apply { if (this) println(Data.EMPTY_INPUT) })
+            val isCorrect= when {
+                input.isEmpty() -> { println(Data.EMPTY_INPUT); false }
+                Nav.isExist(input) -> { println (Data.DUPLICATE); false }
+                else -> true
+            }
+        } while (!isCorrect)
         input
     }
 

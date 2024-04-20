@@ -13,11 +13,7 @@ object Nav {
     var archiveId = 0
     var noteId = 0
     var screens = listOf(ARCHIVE)
-    var archives = listOf<Data.Archive>()
-        set(value) {
-            field = value
-            screens += NOTE
-        }
+    var archives = mutableListOf<Data.Archive>()
     val archive
         get() = if (archives.isNotEmpty()) archives[archiveId] else Data.Archive()
     val list
@@ -29,6 +25,8 @@ object Nav {
         ARCHIVE -> list[0]
         else -> list[1]
     }
+    
+    fun isExist(name: String) = list.firstOrNull { it.name == name } != null
 
     fun back() { screens -= screens.last() }
 }
