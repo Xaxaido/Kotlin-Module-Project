@@ -20,8 +20,7 @@ class Input {
             id = readln().toIntOrNull()
             when (id) {
                 null -> println(Data.NOT_NUMBER)
-                in list.size + 1 until Int.MAX_VALUE,
-                in Int.MIN_VALUE until CREATE -> {
+                !in 0 until list.size + 1 -> {
                     if (id == back) {
                         id = screens.last().let { if (it == ARCHIVE) EXIT else it }
                         back(); break

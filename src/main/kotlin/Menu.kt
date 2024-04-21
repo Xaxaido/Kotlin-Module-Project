@@ -11,19 +11,16 @@ class Menu {
         content
     }
 
-    @Suppress("UNCHECKED_CAST")
     private inline fun <reified T> add(list: MutableList<T>, onAdd: () -> Any = {}) = with (Nav) {
         println(text["EnterName"])
         val name = input.getUserInput()
 
-        when(T::class.java) {
-            Data.Archive::class.java -> {
-                (list as MutableList<Data.Archive>).add(Data.Archive(name, mutableListOf()))
-                screens += NOTE
+        when(T::class.qualifiedName) {
+            "Data.Archive" -> {
+                list.add(Data.Archive(name, mutableListOf()) as T)
+                onAdd()
             }
-            Data.Note::class.java -> {
-                (list as MutableList<Data.Note>).add(Data.Note(name, onAdd().toString()))
-            }
+            "Data.Note" -> list.add(Data.Note(name, onAdd().toString()) as T)
         }
         showMenu(archive.data, archive.name)
     }
@@ -50,9 +47,9 @@ class Menu {
     private fun draw(screen: Int) = with (Nav) {
         when (screen) {
             ARCHIVE -> showMenu(archives)
-            CREATE_ARCHIVE -> add<Data.Archive>(archives)
+            CREATE_ARCHIVE -> add(archives) { screens += NOTE; true }
             OPEN_ARCHIVE, NOTE -> showMenu(archive.data, archive.name)
-            CREATE_NOTE -> add<Data.Note>(archive.data, createNote)
+            CREATE_NOTE -> add(archive.data, createNote)
             OPEN_NOTE -> openNote(archive.data[noteId])
         }
     }
