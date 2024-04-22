@@ -8,20 +8,13 @@ class Menu {
         do {
             val input = input.getUserInput()
         } while ((input != "0").apply { if (this) content.appendLine(input) })
-        content
+        content.toString()
     }
 
     private inline fun <reified T> add(list: MutableList<T>, onAdd: () -> Any = {}) = with (Nav) {
         println(text["EnterName"])
         val name = input.getUserInput()
-
-        when(T::class.qualifiedName) {
-            "Data.Archive" -> {
-                list.add(Data.Archive(name, mutableListOf()) as T)
-                onAdd()
-            }
-            "Data.Note" -> list.add(Data.Note(name, onAdd().toString()) as T)
-        }
+        list.add(T::class.java.constructors.last().newInstance(name, onAdd()) as T)
         showMenu(archive.data, archive.name)
     }
 
@@ -41,13 +34,15 @@ class Menu {
         println(text["Create"]!!)
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
         back = (list.size + 1).apply { println("$this$STR_EXIT") }
-        getMenuId()
+        input.getMenuInput().let { id ->
+            if (id == EXIT) return else draw(getScreen(id))
+        }
     }
 
     private fun draw(screen: Int) = with (Nav) {
         when (screen) {
             ARCHIVE -> showMenu(archives)
-            CREATE_ARCHIVE -> add(archives) { screens += NOTE; true }
+            CREATE_ARCHIVE -> add(archives) { screens += NOTE; mutableListOf<Data.Note>() }
             OPEN_ARCHIVE, NOTE -> showMenu(archive.data, archive.name)
             CREATE_NOTE -> add(archive.data, createNote)
             OPEN_NOTE -> openNote(archive.data[noteId])
@@ -68,9 +63,5 @@ class Menu {
                 screen
             }
         }
-    }
-
-    private fun getMenuId() = input.getMenuInput().let { id ->
-        if (id == Nav.EXIT) return else draw(getScreen(id))
     }
 }

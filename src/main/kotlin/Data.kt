@@ -4,7 +4,7 @@ sealed class Data(
 
     class Archive(
         name: String = "",
-        val data: MutableList<Note> = mutableListOf()
+        val data: MutableList<Note> = mutableListOf(),
     ) : Data(name) {
 
         companion object {
@@ -14,7 +14,7 @@ sealed class Data(
 
     class Note(
         name: String = "",
-        val content: String = ""
+        val content: String = "",
     ) : Data(name) {
 
         companion object {

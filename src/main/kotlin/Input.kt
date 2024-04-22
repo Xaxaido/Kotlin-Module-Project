@@ -4,9 +4,9 @@ class Input {
         var input: String
         do {
             input = readln()
-            val isCorrect= when {
+            val isCorrect = when {
                 input.isEmpty() -> { println(Data.EMPTY_INPUT); false }
-                Nav.isExist(input) -> { println (Data.DUPLICATE); false }
+                Nav.isExist(input) -> { println(Data.DUPLICATE); false }
                 else -> true
             }
         } while (!isCorrect)
@@ -20,7 +20,7 @@ class Input {
             id = readln().toIntOrNull()
             when (id) {
                 null -> println(Data.NOT_NUMBER)
-                !in 0 until list.size + 1 -> {
+                !in 0 .. list.size -> {
                     if (id == back) {
                         id = screens.last().let { if (it == ARCHIVE) EXIT else it }
                         back(); break
