@@ -5,9 +5,9 @@ class Input {
         do {
             input = readln()
             val isCorrect = when {
-                input.isEmpty() -> { println(STR.System.EMPTY_INPUT.message); false }
+                input.isEmpty() -> { println(Str.EMPTY_INPUT.message); false }
                 Nav.list.firstOrNull { it.name == input } != null -> {
-                    println(STR.System.DUPLICATE.message); false
+                    println(Str.DUPLICATE.message); false
                 }
                 else -> true
             }
@@ -21,12 +21,12 @@ class Input {
         while (true) {
             id = readln().toIntOrNull()
             when (id) {
-                null -> println(STR.System.NOT_NUMBER.message)
+                null -> println(Str.NOT_NUMBER.message)
                 !in 0 .. list.size -> {
                     if (id == back) {
                         id = screens.last().let { if (it == ARCHIVE) EXIT else it }
                         back(); break
-                    } else println(STR.System.OUT_OF_RANGE.message)
+                    } else println(Str.OUT_OF_RANGE.message)
                 }
                 else -> {
                     if (id != CREATE)

@@ -22,8 +22,8 @@ object Nav {
         }
 
     fun getMessage(name: String) = when (getCurrentScreen()) {
-        ARCHIVE -> STR.Archive.text(name)
-        else -> STR.Note.text(name)
+        ARCHIVE -> Str.text("ARCHIVE_" + name.uppercase())
+        else -> Str.text("NOTE_" + name.uppercase())
     }
 
     fun back() { screens -= screens.last() }

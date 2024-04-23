@@ -4,7 +4,7 @@ class Menu {
 
     private val createNote: () -> Any = {
         val content = StringBuilder()
-        println(STR.Note.ENTER_TEXT.message)
+        println(Str.NOTE_ENTER_TEXT.message)
         do {
             val input = input.getUserInput()
         } while ((input != "0").apply { if (this) content.appendLine(input) })
@@ -22,7 +22,7 @@ class Menu {
     private fun openNote(note: Data.Note) = with (Nav) {
         Decor.makeFrame(note)
         do {
-            println("0${STR.System.EXIT.message}")
+            println("0${Str.EXIT.message}")
         } while (readln() != "0")
         back()
         showMenu(archive.data, archive.name)
@@ -32,7 +32,7 @@ class Menu {
         Decor.makeHeader(getMessage("LIST") + extra)
         println(getMessage("CREATE"))
         list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
-        back = (list.size + 1).apply { println("$this${STR.System.EXIT.message}") }
+        back = (list.size + 1).apply { println("$this${Str.EXIT.message}") }
         input.getMenuInput().let { if (it == EXIT) return else draw(getScreen(it)) }
     }
 
