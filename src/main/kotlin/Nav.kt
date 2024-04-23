@@ -16,17 +16,10 @@ object Nav {
     val archive
         get() = if (archives.isNotEmpty()) archives[archiveId] else Data.Archive()
     val list
-        get() = when (getCurrentScreen()) {
+        get() = when (screens.last { it < EXIT }) {
             ARCHIVE -> archives
             else -> archive.data
         }
 
-    fun getMessage(name: String) = when (getCurrentScreen()) {
-        ARCHIVE -> Str.text("ARCHIVE_" + name.uppercase())
-        else -> Str.text("NOTE_" + name.uppercase())
-    }
-
     fun back() { screens -= screens.last() }
-
-    private fun getCurrentScreen() = screens.last { it < EXIT }
 }

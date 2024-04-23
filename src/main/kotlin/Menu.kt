@@ -11,8 +11,16 @@ class Menu {
         content.toString()
     }
 
+    private inline fun <reified T : Data> showMenu(list: MutableList<T>, extra: String = ""): Unit = with (Nav) {
+        Decor.makeHeader(Str.text("${T::class.simpleName?.uppercase()}_LIST") + extra)
+        println(Str.text("${T::class.simpleName?.uppercase()}_CREATE"))
+        list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
+        back = (list.size + 1).apply { println("$this${Str.EXIT.message}") }
+        input.getMenuInput().let { if (it == EXIT) return else draw(getScreen(it)) }
+    }
+
     private inline fun <reified T> add(list: MutableList<T>, onAdd: () -> Any = {}) = with (Nav) {
-        println(getMessage("ENTER_NAME"))
+        println(Str.text("${T::class.simpleName?.uppercase()}_ENTER_NAME"))
         list.add(T::class.java.constructors.last().newInstance(input.getUserInput(), onAdd()) as T)
         showMenu(archive.data, archive.name)
     }
@@ -26,14 +34,6 @@ class Menu {
         } while (readln() != "0")
         back()
         showMenu(archive.data, archive.name)
-    }
-
-    private fun showMenu(list: List<Data>, extra: String = ""): Unit = with (Nav) {
-        Decor.makeHeader(getMessage("LIST") + extra)
-        println(getMessage("CREATE"))
-        list.forEachIndexed { i, e -> println("${i + 1}. ${e.name}") }
-        back = (list.size + 1).apply { println("$this${Str.EXIT.message}") }
-        input.getMenuInput().let { if (it == EXIT) return else draw(getScreen(it)) }
     }
 
     private fun draw(screen: Int) = with (Nav) {
