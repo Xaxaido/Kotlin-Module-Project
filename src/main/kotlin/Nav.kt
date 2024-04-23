@@ -8,7 +8,6 @@ object Nav {
     const val NOTE = -5
     const val CREATE_NOTE = -6
     const val OPEN_NOTE = -7
-    const val STR_EXIT = ". Выход"
     var back = EXIT
     var archiveId = 0
     var noteId = 0
@@ -17,16 +16,17 @@ object Nav {
     val archive
         get() = if (archives.isNotEmpty()) archives[archiveId] else Data.Archive()
     val list
-        get() = get(listOf(archives, archive.data))
-    val text
-        get() = get(listOf(Data.Archive.text, Data.Note.text))
+        get() = when (getCurrentScreen()) {
+            ARCHIVE -> archives
+            else -> archive.data
+        }
 
-    private fun <T> get(list: List<T>) = when (screens.last { it < EXIT }) {
-        ARCHIVE -> list[0]
-        else -> list[1]
+    fun getMessage(name: String) = when (getCurrentScreen()) {
+        ARCHIVE -> STR.Archive.text(name)
+        else -> STR.Note.text(name)
     }
-    
-    fun isExist(name: String) = list.firstOrNull { it.name == name } != null
 
     fun back() { screens -= screens.last() }
+
+    private fun getCurrentScreen() = screens.last { it < EXIT }
 }

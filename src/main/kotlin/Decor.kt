@@ -11,7 +11,6 @@ class Decor {
         fun makeFrame(note: Data.Note) {
             val list = note.content.split("\n").filter(String::isNotEmpty).toList()
             val width = list.sortedByDescending { it.length }.take(1).toString().length
-
             makeHeader(note.name)
             list.forEachIndexed { index, entry ->
                 if (index == 0) divider(width)
