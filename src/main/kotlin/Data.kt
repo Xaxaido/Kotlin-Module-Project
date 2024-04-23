@@ -11,4 +11,8 @@ sealed class Data(
         name: String = "",
         val content: String = "",
     ) : Data(name)
+
+    companion object {
+        inline fun <reified T> getClass(list: MutableList<T>) = T::class.simpleName?.uppercase()
+    }
 }

@@ -2,16 +2,18 @@ class Input {
 
     fun getUserInput() = run {
         var input: String
+
         do {
             input = readln()
+
             val isCorrect = when {
-                input.isEmpty() -> { println(Str.EMPTY_INPUT.message); false }
-                Nav.list.firstOrNull { it.name == input } != null -> {
-                    println(Str.DUPLICATE.message); false
-                }
+                input.isEmpty() -> println(Str.EMPTY_INPUT.message).let { false }
+                Nav.list.firstOrNull { it.name == input } != null ->
+                    println(Str.DUPLICATE.message).let { false }
                 else -> true
             }
         } while (!isCorrect)
+
         input
     }
 
