@@ -17,7 +17,7 @@ class Input {
         input
     }
 
-    fun getMenuInput() = with(Nav) {
+    fun getScreen() = with(Nav) {
         var id: Int?
 
         while (true) {

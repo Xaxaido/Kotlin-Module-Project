@@ -1,1 +1,1 @@
-fun main() = Menu().start()
+fun main() = Menu().draw()

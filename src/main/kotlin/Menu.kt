@@ -13,14 +13,21 @@ class Menu {
         content.toString()
     }
 
+    private val openNote: (Note) -> Unit = {
+        Decor.makeFrame(it)
+        do {
+            println("0${Str.EXIT.message}")
+        } while (readln() != "0")
+        Nav.back()
+    }
+
     private inline fun <reified T> showMenu(
         list: MutableList<T>,
-        extra: String = "",
+        onStart: () -> Unit = {},
     ): Unit = with (Nav) {
-        Decor.makeHeader(buildString {
-            append(Str.text("${getClass(list)}_LIST"))
-            append(extra)
-        })
+        onStart()
+        val extra = if (T::class.qualifiedName == "Note") archive.name else ""
+        Decor.makeHeader(Str.text("${getClass(list)}_LIST") + extra)
         println(Str.text("${getClass(list)}_CREATE"))
 
         list.forEachIndexed { i, e -> println("${i + 1}. $e") }
@@ -28,44 +35,32 @@ class Menu {
         back = (list.size + 1).apply {
             println("$this${Str.EXIT.message}")
         }
-        input.getMenuInput().let {
+        input.getScreen().let {
             if (it == EXIT) return else draw(it)
         }
     }
 
-    private inline fun <reified T> add(
-        list: MutableList<T>,
-        onAdd: () -> Any
-    ) = with (Nav) {
-        println(Str.text("${getClass(list)}_ENTER_NAME"))
+    private inline fun <reified T> add(list: MutableList<T>, onAdd: () -> Any) {
+        println(Str.text("${Nav.getClass(list)}_ENTER_NAME"))
         list.add(
             T::class.java.constructors.first { it.parameterTypes.size == 2 }
                 .newInstance(input.getUserInput(), onAdd()) as T
         )
-        showMenu(archive.data, archive.name)
     }
 
-    fun start() { draw(Nav.ARCHIVE_LIST) }
-
-    private fun openNote(note: Note) = with (Nav) {
-        Decor.makeFrame(note)
-        do {
-            println("0${Str.EXIT.message}")
-        } while (readln() != "0")
-        back()
-        showMenu(archive.data, archive.name)
-    }
-
-    private fun draw(screen: Int) = with (Nav) {
+    fun draw(screen: Int = Nav.ARCHIVE_LIST) = with (Nav) {
+        val list = archive.data
         when (screen) {
-            ARCHIVE_LIST -> showMenu(archives)
-            CREATE_ARCHIVE -> add(archives) {
-                screens += NOTE_LIST
-                mutableListOf<Note>()
+            CREATE_ARCHIVE -> showMenu(list) {
+                add(archives) {
+                    screens += NOTE_LIST
+                    mutableListOf<Note>()
+                }
             }
-            NOTE_LIST -> showMenu(archive.data, archive.name)
-            CREATE_NOTE -> add(archive.data, createNote)
-            OPEN_NOTE -> openNote(archive.data[noteId])
+            NOTE_LIST -> showMenu(list)
+            CREATE_NOTE -> showMenu(list) { add(list, createNote) }
+            OPEN_NOTE -> showMenu(list) { openNote(list[noteId]) }
+            else -> showMenu(archives)
         }
     }
 }
