@@ -8,7 +8,7 @@ class Input {
 
             val isCorrect = when {
                 input.isEmpty() -> println(Str.EMPTY_INPUT.message).let { false }
-                Nav.list.firstOrNull { it.name == input } != null ->
+                Nav.list.firstOrNull { it == input } != null ->
                     println(Str.DUPLICATE.message).let { false }
                 else -> true
             }
@@ -26,13 +26,24 @@ class Input {
                 null -> println(Str.NOT_NUMBER.message)
                 !in 0 .. list.size -> {
                     if (id == back) {
-                        id = screens.last().let { if (it == ARCHIVE) EXIT else it }
-                        back(); break
+                        back()
+                        id = screens.lastOrNull() ?: EXIT
+                        break
                     } else println(Str.OUT_OF_RANGE.message)
                 }
                 else -> {
-                    if (id != CREATE)
-                        screens += if (screens.last() == ARCHIVE) NOTE else OPEN_NOTE
+                    val screen = screens.last()
+                    if (id != CREATE) {
+                        id = if (screen == ARCHIVE_LIST) {
+                            archiveId = id - 1
+                            NOTE_LIST
+                        } else {
+                            noteId = id - 1
+                            OPEN_NOTE
+                        }
+                        screens += id
+                    }
+                    else id = if (screen == ARCHIVE_LIST) CREATE_ARCHIVE else CREATE_NOTE
                     break
                 }
             }
