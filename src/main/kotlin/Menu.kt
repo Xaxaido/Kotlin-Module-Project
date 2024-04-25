@@ -49,18 +49,16 @@ class Menu {
     }
 
     fun draw(screen: Int = Nav.ARCHIVE_LIST) = with (Nav) {
-        val list = archive.data
-        when (screen) {
-            CREATE_ARCHIVE -> showMenu(list) {
-                add(archives) {
-                    screens += NOTE_LIST
-                    mutableListOf<Note>()
-                }
+        if (screen == ARCHIVE_LIST) showMenu(archives)
+        else showMenu(archive.data) {
+            when (screen) {
+                CREATE_ARCHIVE -> add(archives) {
+                        screens += NOTE_LIST
+                        mutableListOf<Note>()
+                    }
+                CREATE_NOTE -> add(archive.data, createNote)
+                OPEN_NOTE -> openNote(archive.data[noteId])
             }
-            NOTE_LIST -> showMenu(list)
-            CREATE_NOTE -> showMenu(list) { add(list, createNote) }
-            OPEN_NOTE -> showMenu(list) { openNote(list[noteId]) }
-            else -> showMenu(archives)
         }
     }
 }
