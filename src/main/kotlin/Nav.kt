@@ -8,7 +8,7 @@ object Nav {
     const val CREATE_NOTE = -5
     const val OPEN_NOTE = -6
     var back = EXIT
-    var archiveId = 0
+    private var archiveId = 0
     var noteId = 0
     var screens = listOf(ARCHIVE_LIST)
     var archives = mutableListOf<Archive>()
@@ -19,6 +19,11 @@ object Nav {
             ARCHIVE_LIST -> archives
             else -> archive.data
         }
+
+    fun setId(id: Int) {
+        if (screens.last() == ARCHIVE_LIST) archiveId = id - 1 else noteId = id - 1
+        screens += id
+    }
 
     fun back() { screens -= screens.last() }
     inline fun <reified T> getClass(list: MutableList<T>) = T::class.simpleName?.uppercase()
