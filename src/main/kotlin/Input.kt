@@ -1,3 +1,5 @@
+import kotlin.system.exitProcess
+
 class Input {
 
     fun getUserInput() = run {
@@ -17,27 +19,20 @@ class Input {
     }
 
     fun getScreen() = with(Nav) {
-        var id: Int?
-        val screen = screens.last()
+        var id: Int? = null
 
         do {
-            id = readln().toIntOrNull()
-            id = when (id) {
-                null -> println(Str.NOT_NUMBER.message).let { null }
+            readln().toIntOrNull()?.let { id = it } ?: println(Str.NOT_NUMBER.message)
+            if (id != null) id = when (id) {
                 !in 0 .. list.size -> {
-                    if (id == back) {
-                        back()
-                        screens.lastOrNull() ?: EXIT
-                    } else println(Str.OUT_OF_RANGE.message).let { null }
+                    if (id == back) back() ?: exitProcess(0)
+                    else println(Str.OUT_OF_RANGE.message).let { null }
                 }
-                CREATE -> if (screen == ARCHIVE_LIST) CREATE_ARCHIVE else CREATE_NOTE
-                else -> {
-                    setId(id)
-                    if (screen == ARCHIVE_LIST) NOTE_LIST else OPEN_NOTE
-                }
+                CREATE -> if (screens.last() == ARCHIVE_LIST) CREATE_ARCHIVE else CREATE_NOTE
+                else -> getNotes(id!!)
             }
         } while (id == null)
 
-        id
+        id!!
     }
 }

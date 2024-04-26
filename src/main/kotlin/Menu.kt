@@ -35,9 +35,7 @@ class Menu {
         back = (list.size + 1).apply {
             println("$this${Str.EXIT.message}")
         }
-        input.getScreen().let {
-            if (it == EXIT) return else draw(it)
-        }
+        draw(input.getScreen())
     }
 
     private inline fun <reified T> add(list: MutableList<T>, onAdd: () -> Any) {
